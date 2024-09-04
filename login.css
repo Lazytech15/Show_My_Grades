@@ -1,0 +1,169 @@
+
+body{
+    height: 100vh;
+    background: rgb(160,19,255);
+    background: linear-gradient(344deg, rgba(160,19,255,1) 13%, rgba(255,134,35,1) 72%, rgba(175,119,73,1) 92%);
+}
+.login-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    padding: 50px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px var(--bs-c);
+    background-color: var(--w-c);
+    
+}
+.login-text{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.login-text h2{
+    font-family: "Matemasie", sans-serif;
+    font-weight: 900;
+    font-size: var(--ts-l);
+}
+
+.eye-container {
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: all 0.2s;
+}
+
+.eye {
+    width: 100px;
+    height: 100px;
+    background: url('assets/eye1.png') no-repeat center center;
+    background-size: contain;
+    transition: all 0.1s ease-in-out;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 600;
+    font-size: var(--ts-ss);
+    text-transform: uppercase;
+    align-items: center;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0px;
+    box-sizing: border-box;
+    font-family: "Roboto Slab", serif;
+    font-size: var(--ts-ss);
+    font-weight: 700;
+}
+.showpass{
+    display: flex;
+    justify-content: space-between;
+}
+.showme{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+}
+.showme input:checked{
+    width:15px;
+}
+.password-container {
+    position: relative;
+}
+
+input[type=password]::-ms-reveal,
+input[type=password]::-ms-clear
+{
+    display: none;
+}
+form button{
+    width: 100%;
+    padding: 5px;
+    font-family: "Roboto Slab", serif;
+    font-weight: 800;
+    background-color: var(--lbh-c);
+    border-radius: 5px;
+    border-style: none;
+    color: var(--w-c);
+    transition: all 0.5s;
+}
+form button:hover{
+    background-color: var(--lbh-c);
+}
+
+/* dark-mode toggle*/
+.toggle-container {
+    margin-top: 20px;
+    position: relative;
+    width: 60px;
+    height: 30px;
+}
+
+#dark-mode-toggle {
+    display: none;
+}
+
+.toggle-label {
+    display: block;
+    width: 85%;
+    height: 85%;
+    background-color: var(--lbh-c);
+    border-radius: 30px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 6px;
+    left: 3px;
+    width: 15px;
+    height: 15px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+#dark-mode-toggle:checked + .toggle-label {
+    background-color: var(--p-c);
+}
+
+#dark-mode-toggle:checked + .toggle-label .toggle-slider {
+    transform: translateX(30px);
+}
+
+body.dark-mode{
+    background: var(--db-c);
+    color: var(--w-c);
+}
+body.dark-mode .login-container {
+    box-shadow: 0 0 10px var(--ws-c);
+    background-color: var(--dt-c);
+}
+body.dark-mode form button{
+    background-color: var(--p-c);
+}
+body.dark-mode form button:hover{
+    background-color: var(--dbh-c);
+}
+
+@media screen and (max-width:700px) {
+    .login-container {
+        width: 75%;
+        font-size: var(--ts-ss);
+    }
+    
+}

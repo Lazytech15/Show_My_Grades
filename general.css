@@ -1,0 +1,43 @@
+/* header font-style */
+@import url('https://fonts.googleapis.com/css2?family=Matemasie&display=swap');
+/* font-family: "Matemasie", sans-serif; */
+
+/* paragraph font-style */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+/* font-family: "Open Sans", sans-serif; */
+
+/* button font-style */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap');
+/* font-family: "Roboto Slab", serif; */
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+:root{
+    /* light mode color */
+    --o-c:#ff4800;
+    --w-c:#ffff;
+    --b-c:#2b2828;
+    --lb-c:#3d3d3d;
+    --lbh-c:#ff7842;
+    --bs-c:rgba(0, 0, 0, 0.1);
+
+    /* dark mode color */
+    --p-c:#990330;
+    --w-c:#ffff;
+    --db-c:linear-gradient(to right, #434343 0%, black 100%);
+    --dt-c:#633100;
+    --lb-c:#3d3d3d;
+    --ws-c:rgba(255, 255, 255, 0.1);
+    --dbh-c:#bd305a;
+
+    /* font-size */
+    --ts-ss:0.8rem;
+    --ts-s:1rem;
+    --ts-sm:1.3rem;
+    --ts-m:1.5rem;
+    --ts-l:1.8rem;
+    --ts-lx:2rem;
+}
