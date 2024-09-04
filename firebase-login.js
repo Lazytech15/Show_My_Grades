@@ -38,10 +38,13 @@ document.getElementById('show-password').addEventListener('change', (e) => {
 
 onAuthStateChanged(auth, (user) => {
     const currentPath = window.location.pathname;
+    console.log('Current Path:', currentPath);
+    console.log('User:', user);
     if (!user && currentPath !== '/index.html') {
         window.location.href = 'index.html'; // Redirect to login if not authenticated
     }
 });
+
 
 // // Sign-out logic
 // document.getElementById('index-logout').addEventListener('click', async () => {
