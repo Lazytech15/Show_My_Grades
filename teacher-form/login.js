@@ -4,9 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const eye = document.getElementById('eye');
     const showPasswordCheckbox = document.getElementById('show-password');
 
-    const eyeFrames = ['/assets/eye1.png', '/assets/eye2.png', '/assets/eye3.png', '/assets/eye4.png', '/assets/eye5.png'];
-    const eyePassword = '/assets/eye-password.png';
-    const eyeVisible = '/assets/eye-visible.png';
+    const eyeFrames = ['assets/eye1.png', 'assets/eye2.png', 'assets/eye3.png', 'assets/eye4.png', 'assets/eye5.png'];
+    const eyePassword = 'assets/eye-password.png';
+    const eyeVisible = 'assets/eye-visible.png';
 
     function moveEye(input) {
         const inputLength = input.value.length;
