@@ -38,7 +38,7 @@ document.getElementById('show-password').addEventListener('change', (e) => {
 
 onAuthStateChanged(auth, (user) => {
     const currentPath = window.location.pathname;
-    if (!user && currentPath !== 'https://github.com/Lazytech15/Show_My_Grades/') {
+    if (!user && currentPath !== 'https://lazytech15.github.io/Show_My_Grades/index.html') {
         window.location.href = 'index.html'; // Redirect to login if not authenticated
     }
 });
