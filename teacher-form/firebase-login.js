@@ -22,7 +22,7 @@ document.querySelector('form').addEventListener('submit', (e) => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
-        window.location.href = '/teacher-form/main.html'; // Redirect to main.html
+        window.location.href = 'teacher-form/main.html'; // Redirect to main.html
       })
       .catch((error) => {
         document.getElementById('username').value='';
