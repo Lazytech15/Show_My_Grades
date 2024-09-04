@@ -40,7 +40,7 @@ document.getElementById('show-password').addEventListener('change', (e) => {
 
 onAuthStateChanged(auth, (user) => {
     const currentPath = window.location.pathname;
-    if (!user && currentPath !== '.index.html') {
+    if (!user && currentPath !== '/index.html') {
         window.location.href = 'index.html'; // Redirect to login if not authenticated
     }
 });
