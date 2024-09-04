@@ -14,9 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-setPersistence(auth, browserLocalPersistence)
-  .then(() => {
-    document.querySelector('form').addEventListener('submit', (e) => {
+document.querySelector('form').addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('username').value;
     const password = document.getElementById('password').value;
@@ -44,10 +42,6 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = 'index.html'; // Redirect to login if not authenticated
     }
 });
-  })
-  .catch((error) => {
-    console.error("Error setting persistence:", error);
-  });
 
 
 // // Sign-out logic
