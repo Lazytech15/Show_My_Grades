@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monkey-Login</title>
+    <link rel="icon" href="/assets/eye1.png" type="image/x-icon">
+
+    <link rel="stylesheet" href="/teacher-form/login.css">
+    <link rel="stylesheet" href="/teacher-form/general.css">
+</head>
+<body>
+    <figure class="login-container">
+        <article class="eye-container" id="eye-container">
+            <div class="eye" id="eye"></div>
+        </article>
+        <article class="login-text">  
+            <h2>Login</h2>
+            <div class="toggle-container">
+                <input type="checkbox" id="dark-mode-toggle" onclick="toggleTheme()">
+                <label for="dark-mode-toggle" class="toggle-label">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </article>
+        <form>
+            <figure class="input-group">
+                <label for="username">Email</label>
+                <input type="text" id="username" name="username" required>
+                    <div class="showpass">
+                        <label for="password">Password</label>
+                        <div class="showme">
+                        <label for="pass-visible">Show</label>
+                        <input type="checkbox" name="pass-visible" id="show-password">
+                        </div>
+                    </div>
+                    <input type="password" id="password" name="password" required>
+            </figure>
+            <button type="submit">Login</button>
+        </form>
+    </figure>
+    <!-- dark mode -->
+    <script type="module" src="/teacher-form/firebase-login.js"></script>
+    <script src="https://firebase.google.com/docs/web/setup#available-libraries"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="/teacher-form/login.js"></script>
+</body>
+</html>

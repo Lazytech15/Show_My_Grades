@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/teacher-form/index.css">
+    <link rel="stylesheet" href="/teacher-form/general.css">
+    <link rel="icon" href="/assets/eye1.png" type="image/x-icon">
+    <title>Monkey-Main</title>
+</head>
+<body>
+    <header>
+        <div class="icon-container">
+            <img src="/assets/icon-header.png" alt=""><a href="">Show-Grades</a>
+        </div>
+        <div class="nav-bar-container">
+            <nav>
+                <ul>
+                    <button onclick="toggleTheme()"><img src="https://cdn-icons-png.flaticon.com/128/7645/7645197.png" alt="" id="toggle_darkmode"></button>
+                    <a href="" id="index-logout"><img src="/assets/logout.png" alt=""></a>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <hr>
+    <main>
+        <section class="table-section">
+            <div id="drop-zone">
+                <p>Drag & drop files here or click to upload</p>
+                <input type="file" id="file-input" accept=".csv, .xls, .xlsx" style="display: none;">
+            </div>
+            <div id="csv-table-container" class="table-container"></div>
+            <div class="table-buttons">
+                <input type="text" id="search-bar" placeholder="STUDENT ID" style="display: none;">
+                <button class="table-button" id="save-button" style="display: none;">save</button>
+                <button class="table-button" id="edit-button" style="display: none;">edit</button>
+                <button class="table-button" id="upload-button" style="display: none;">upload</button>
+            </div>
+            <div id="loading-indicator" style="display: none;">
+                <div class="ripple"></div>
+            </div>
+        </section>        
+        <article>
+                
+        </article>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://firebase.google.com/docs/web/setup#available-libraries"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="/teacher-form/index.js"></script>
+    <script type="module" src="/teacher-form/firebase-module.js"></script>
+</body>
+</html>

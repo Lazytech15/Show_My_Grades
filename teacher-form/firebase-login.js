@@ -22,7 +22,7 @@ document.querySelector('form').addEventListener('submit', (e) => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
-        window.location.href = '/teacher-form/index.html'; // Redirect to main.html
+        window.location.href = '/teacher-form/main.html'; // Redirect to main.html
       })
       .catch((error) => {
         document.getElementById('username').value='';
@@ -38,8 +38,8 @@ document.getElementById('show-password').addEventListener('change', (e) => {
 
 onAuthStateChanged(auth, (user) => {
     const currentPath = window.location.pathname;
-    if (!user && currentPath !== '/teacher-form/login.html') {
-        window.location.href = '/teacher-form/login.html'; // Redirect to login if not authenticated
+    if (!user && currentPath !== '/index.html') {
+        window.location.href = 'index.html'; // Redirect to login if not authenticated
     }
 });
 
