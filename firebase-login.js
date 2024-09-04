@@ -36,17 +36,15 @@ document.getElementById('show-password').addEventListener('change', (e) => {
     passwordField.type = e.target.checked ? 'text' : 'password';
 });
 
-let redirectOccurred = false;
+let authStateChangedHandler = null;
 
-onAuthStateChanged(auth, (user) => {
+authStateChangedHandler = onAuthStateChanged(auth, (user) => {
   const currentPath = window.location.pathname;
   console.log('Current Path:', currentPath);
   console.log('User:', user);
-  if (!user && currentPath !== '/index.html' && !redirectOccurred) {
-    redirectOccurred = true;
+  if (!user && currentPath !== '/index.html') {
+    offAuthStateChanged(auth, authStateChangedHandler);
     window.location.href = 'index.html'; // Redirect to login if not authenticated
-  } else {
-    redirectOccurred = false;
   }
 });
 
