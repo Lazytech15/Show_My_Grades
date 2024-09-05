@@ -32,6 +32,7 @@ document.querySelector('form').addEventListener('submit', async (e) => {
       document.getElementById('username').value = '';
       document.getElementById('password').value = '';
       swal("LOGIN FAILED!", "USER DATA NOT FOUND!", "error");
+      document.getElementById('loading-indicator').style.display = 'none';
   } finally {
       // document.getElementById('loading-indicator').style.display = 'none';
       isSigningIn = false;
