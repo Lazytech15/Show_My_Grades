@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const eyePassword = 'assets/eye-password.png';
     const eyeVisible = 'assets/eye-visible.png';
 
+    // Preload images
+    const preloadImages = (srcArray) => {
+        srcArray.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
+    };
+
+    preloadImages([...eyeFrames, eyePassword, eyeVisible]);
+
     function moveEye(input) {
         const inputLength = input.value.length;
         const maxLength = input.getAttribute('maxlength') || 20;
@@ -98,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
 
 // dark-mode
 document.addEventListener('DOMContentLoaded', () => {
