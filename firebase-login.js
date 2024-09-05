@@ -40,13 +40,18 @@ document.getElementById('show-password').addEventListener('change', (e) => {
 
 let authStateChangedHandler = null;
 
-authStateChangedHandler = onAuthStateChanged(auth, (user) => {
-  const currentPath = window.location.pathname;
-  console.log('Current Path:', currentPath);
-  console.log('User:', user);
-  if (!user && currentPath !== '/index.html' && !isSigningIn) {
-    offAuthStateChanged(auth, authStateChangedHandler);
-    window.location.href = 'index.html'; // Redirect to login if not authenticated
-  }
-});
+try {
+  authStateChangedHandler = onAuthStateChanged(auth, (user) => {
+    const currentPath = window.location.pathname;
+    console.log('Current Path:', currentPath);
+    console.log('User:', user);
+    if (!user && currentPath !== '/index.html' && !isSigningIn) {
+      offAuthStateChanged(auth, authStateChangedHandler);
+      window.location.href = 'index.html'; // Redirect to login if not authenticated
+    }
+  });
+} catch (error) {
+  console.error('Error handling auth state change:', error);
+}
+
 
