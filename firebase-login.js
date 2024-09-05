@@ -14,8 +14,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-let isSigningIn = false;
-
 document.querySelector('form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('username').value;
@@ -23,46 +21,31 @@ document.querySelector('form').addEventListener('submit', async (e) => {
 
   try {
       document.getElementById('loading-indicator').style.display = 'flex';
-      isSigningIn = true;
       
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       // Sign-in successful
-      window.location.href = 'main.html';
   } catch (error) {
       document.getElementById('username').value = '';
       document.getElementById('password').value = '';
       swal("LOGIN FAILED!", "USER DATA NOT FOUND!", "error");
   } finally {
       document.getElementById('loading-indicator').style.display = 'none';
-      isSigningIn = false;
+      window.location.href = 'main.html'; // Redirect to main.html
   }
 });
-
 document.getElementById('show-password').addEventListener('change', (e) => {
     const passwordField = document.getElementById('password');
     passwordField.type = e.target.checked ? 'text' : 'password';
 });
 
-let unsubscribeAuthStateChanged = null;
+let authStateChangedHandler = null;
 
-unsubscribeAuthStateChanged = onAuthStateChanged(auth, (user) => {
+authStateChangedHandler = onAuthStateChanged(auth, (user) => {
   const currentPath = window.location.pathname;
   console.log('Current Path:', currentPath);
   console.log('User:', user);
-  if (!user && currentPath !== '/index.html' && !isSigningIn) {
+  if (!user && currentPath !== '/index.html') {
+    offAuthStateChanged(auth, authStateChangedHandler);
     window.location.href = 'index.html'; // Redirect to login if not authenticated
   }
 });
-
-
-
-// // Sign-out logic
-// document.getElementById('index-logout').addEventListener('click', async () => {
-//     try {
-//         await signOut(auth);
-//         console.log('User signed out successfully');
-//         window.location.href = 'login.html';
-//     } catch (error) {
-//         console.error('Error signing out: ', error);
-//     }
-// });
