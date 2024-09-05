@@ -14,21 +14,28 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-document.querySelector('form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-  
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        window.location.href = 'main.html'; // Redirect to main.html
-      })
-      .catch((error) => {
-        document.getElementById('username').value='';
-        document.getElementById('password').value='';
-        swal("LOGIN FAILD!", "USER DATA NOT FOUND!.", "error");
-      });
+let isSigningIn = false;
+
+document.querySelector('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  try {
+      document.getElementById('loading-indicator').style.display = 'flex';
+      isSigningIn = true;
+      
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // Sign-in successful
+      window.location.href = 'main.html';
+  } catch (error) {
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      swal("LOGIN FAILED!", "USER DATA NOT FOUND!", "error");
+  } finally {
+      document.getElementById('loading-indicator').style.display = 'none';
+      isSigningIn = false;
+  }
 });
 
 document.getElementById('show-password').addEventListener('change', (e) => {
@@ -42,11 +49,12 @@ authStateChangedHandler = onAuthStateChanged(auth, (user) => {
   const currentPath = window.location.pathname;
   console.log('Current Path:', currentPath);
   console.log('User:', user);
-  if (!user && currentPath !== '/index.html') {
+  if (!user && currentPath !== '/index.html' && !isSigningIn) {
     offAuthStateChanged(auth, authStateChangedHandler);
     window.location.href = 'index.html'; // Redirect to login if not authenticated
   }
 });
+
 
 
 // // Sign-out logic
