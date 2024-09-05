@@ -49,7 +49,7 @@ authStateChangedHandler = onAuthStateChanged(auth, (user) => {
   console.log('Current Path:', currentPath);
   console.log('User:', user);
   if (!user && currentPath !== '/index.html' && !isSigningIn) {
-    offAuthStateChanged(auth, authStateChangedHandler);
+    onAuthStateChanged(auth, authStateChangedHandler);
     window.location.href = 'index.html'; // Redirect to login if not authenticated
   }
 });
