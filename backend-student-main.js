@@ -44,10 +44,12 @@ getDocs(colRef)
 
 // Function to create the table
 function createTable(data) {
+    // Show loading indicator
+    document.getElementById('loader-container').style.display = 'block';
 
     // Define the desired order of keys
     const desiredOrder = [
-        'STUDENT_NUM', 'STUDENT_NAME', 'SECTION', 'EMAIL', 'TRIMESTER','DAY', 'TIME', 'COURSE_CODE', 'COURSE_DESCRIPTION', 
+        'STUDENT_NUM', 'STUDENT_NAME', 'SECTION', 'EMAIL', 'TRIMESTER', 'DAY', 'TIME', 'COURSE_CODE', 'COURSE_DESCRIPTION',
         'PRELIM', 'MIDTERM', 'FINALS', 'CREDIT_UNITS', 'FACULTY_NAME'
     ];
 
@@ -63,14 +65,13 @@ function createTable(data) {
     // Generate the table HTML
     let tableHtml = '<table>';
     if (rearrangedData.length > 0) {
-        
         // Create table headers
         tableHtml += '<thead><tr>';
         desiredOrder.forEach(key => {
             tableHtml += `<th>${key}</th>`;
         });
         tableHtml += '</tr></thead>';
-        
+
         // Create table rows
         tableHtml += '<tbody>';
         rearrangedData.forEach((row, index) => {
@@ -85,6 +86,10 @@ function createTable(data) {
     }
     tableHtml += '</table>';
     document.getElementById('csv-table-container').innerHTML = tableHtml;
+
+    // Hide loading indicator
+    document.getElementById('loader-container').style.display = 'none';
+    document.getElementById('search-bar').style.display = 'flex';
 }
 
 function filterTable() {
