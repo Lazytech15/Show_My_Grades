@@ -39,14 +39,14 @@ document.getElementById('show-password').addEventListener('change', (e) => {
 });
 
 let authStateChangedHandler = null;
-let isRedirecting = false;
 
-authStateChangedHandler = auth.onAuthStateChanged((user) => {
+authStateChangedHandler = onAuthStateChanged(auth, (user) => {
   const currentPath = window.location.pathname;
   console.log('Current Path:', currentPath);
   console.log('User:', user);
-  if (!user && currentPath !== '/index.html' && !isRedirecting) {
-    isRedirecting = true;
+  if (!user && currentPath !== '/index.html' && !isSigningIn) {
+    offAuthStateChanged(auth, authStateChangedHandler);
     window.location.href = 'index.html'; // Redirect to login if not authenticated
   }
 });
+
