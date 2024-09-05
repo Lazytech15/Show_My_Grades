@@ -47,7 +47,6 @@ authStateChangedHandler = auth.onAuthStateChanged((user) => {
   console.log('User:', user);
   if (!user && currentPath !== '/index.html' && !isRedirecting) {
     isRedirecting = true;
-    auth.onAuthStateChanged(null); // Detach the listener
     window.location.href = 'index.html'; // Redirect to login if not authenticated
   }
 });
