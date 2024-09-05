@@ -13,6 +13,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+let isSigningIn = false;
+
 
 document.querySelector('form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -21,18 +23,21 @@ document.querySelector('form').addEventListener('submit', async (e) => {
 
   try {
       document.getElementById('loading-indicator').style.display = 'flex';
+      isSigningIn = true;
       
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       // Sign-in successful
+      window.location.href = 'main.html';
   } catch (error) {
       document.getElementById('username').value = '';
       document.getElementById('password').value = '';
       swal("LOGIN FAILED!", "USER DATA NOT FOUND!", "error");
   } finally {
-      document.getElementById('loading-indicator').style.display = 'none';
-      window.location.href = 'main.html'; // Redirect to main.html
+      // document.getElementById('loading-indicator').style.display = 'none';
+      isSigningIn = false;
   }
 });
+
 document.getElementById('show-password').addEventListener('change', (e) => {
     const passwordField = document.getElementById('password');
     passwordField.type = e.target.checked ? 'text' : 'password';
@@ -40,20 +45,12 @@ document.getElementById('show-password').addEventListener('change', (e) => {
 
 let authStateChangedHandler = null;
 
-try {
-  let authStateChangedHandler = null;
-
 authStateChangedHandler = onAuthStateChanged(auth, (user) => {
-  let isSigningIn = false;
   const currentPath = window.location.pathname;
   console.log('Current Path:', currentPath);
   console.log('User:', user);
   if (!user && currentPath !== '/index.html' && !isSigningIn) {
-    onAuthStateChanged(auth, authStateChangedHandler);
+    offAuthStateChanged(auth, authStateChangedHandler);
     window.location.href = 'index.html'; // Redirect to login if not authenticated
   }
 });
-} catch (error) {
-  console.error('Error handling auth state change:', error);
-}
-
