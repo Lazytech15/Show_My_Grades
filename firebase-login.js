@@ -43,14 +43,14 @@ document.getElementById('show-password').addEventListener('change', (e) => {
     passwordField.type = e.target.checked ? 'text' : 'password';
 });
 
-let authStateChangedHandler = null;
+let unsubscribeAuthStateChanged = null;
 
-authStateChangedHandler = onAuthStateChanged(auth, (user) => {
+unsubscribeAuthStateChanged = onAuthStateChanged(auth, (user) => {
   const currentPath = window.location.pathname;
   console.log('Current Path:', currentPath);
   console.log('User:', user);
   if (!user && currentPath !== '/index.html' && !isSigningIn) {
-    offAuthStateChanged(auth, authStateChangedHandler);
+    unsubscribeAuthStateChanged(); // Remove the listener
     window.location.href = 'index.html'; // Redirect to login if not authenticated
   }
 });
