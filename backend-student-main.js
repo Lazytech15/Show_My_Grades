@@ -50,7 +50,7 @@ function createTable(data) {
     // Define the desired order of keys
     const desiredOrder = [
         'STUDENT_NUM', 'STUDENT_NAME', 'SECTION', 'EMAIL', 'TRIMESTER', 'DAY', 'TIME', 'COURSE_CODE', 'COURSE_DESCRIPTION',
-        'PRELIM', 'MIDTERM', 'FINALS', 'CREDIT_UNITS', 'FACULTY_NAME'
+        'PRELIM_GRADE', 'MIDTERM_GRADE', 'FINAL_GRADE', 'CREDIT_UNITS', 'FACULTY_NAME'
     ];
 
     // Rearrange and filter the data
