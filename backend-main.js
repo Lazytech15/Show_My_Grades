@@ -26,11 +26,11 @@ const addDataToFirestore = async () => {
     try {
         const studentEmail = data.EMAIL;
         const courseCode = data.COURSE_CODE;
-        const auth = getAuth();
+        const auth = getAuth(app);
 
         // Check if the email already exists in Firebase Authentication
         const existingUser = await fetchSignInMethodsForEmail(auth, studentEmail);
-        let password;
+        let password = "password";
 
         if (existingUser) {
             // Email already exists, retrieve existing password from Firestore
@@ -39,37 +39,40 @@ const addDataToFirestore = async () => {
                 password = userDoc.data().PASSWORD;
                 console.log(`Email ${studentEmail} already exists, using existing password: ${password}`);
             } else {
-                // If password document not found, generate a new password
-                password = generateRandomPassword();
-                console.log(`Generated new password for ${studentEmail}: ${password}`);
-
+              try {
                 // Create a new password document in Firestore
-                await setDoc(doc(db,studentEmail,  courseCode), { PASSWORD: password });
-                
-            }
-        } else {
-            // Generate a new password
-            password = generateRandomPassword();
-            console.log(`Generated new password for ${studentEmail}: ${password}`);
-
-            try {
-                // Create a new user in Firebase Authentication
-                await createUserWithEmailAndPassword(auth, studentEmail, password);
-                console.log("User created successfully in Firebase Authentication: ", studentEmail);
-            } catch (error) {
-                console.error("Error creating user in Firebase Authentication: ", error);
-                throw error; // Stop execution if user creation fails
-            }
-
-            try {
-                // Create a new password document in Firestore
-                await setDoc(doc(db,  studentEmail,  courseCode), { PASSWORD: password });
+                await setDoc(doc(db,  studentEmail,  courseCode), data);
                 console.log("Password document created successfully in Firestore: ", studentEmail, courseCode);
                 
-            } catch (error) {
-                console.error("Error creating password document in Firestore: ", error);
-                throw error; // Stop execution if document creation fails
+              } catch (error) {
+                  console.error("Error creating password document in Firestore: ", error);
+                  throw error; // Stop execution if document creation fails
+              }
+                
             }
+        } else{
+          // Generate a new password
+          password = generateRandomPassword();
+          console.log(`Generated new password for ${studentEmail}: ${password}`);
+
+          try {
+              // Create a new user in Firebase Authentication
+              await createUserWithEmailAndPassword(auth, studentEmail, password);
+              console.log("User created successfully in Firebase Authentication: ", studentEmail);
+          } catch (error) {
+              console.error("Error creating user in Firebase Authentication: ", error);
+              throw error; // Stop execution if user creation fails
+          }
+
+          try {
+              // Create a new password document in Firestore
+              await setDoc(doc(db,  studentEmail,  courseCode), { PASSWORD: password });
+              console.log("Password document created successfully in Firestore: ", studentEmail, courseCode);
+              
+          } catch (error) {
+              console.error("Error creating password document in Firestore: ", error);
+              throw error; // Stop execution if document creation fails
+          }
         }
 
         // Add the password to the data object

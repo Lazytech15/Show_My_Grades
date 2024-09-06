@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableHtml += `<tr data-index="${index}">`;
                 Object.entries(row).forEach(([key, cell]) => {
                     // Insert non-breaking space if cell is empty
-                    tableHtml += `<td data-label="${key}" contenteditable="false">${cell || ' '}</td>`;
+                    tableHtml += `<td data-column-name="${key}" data-label="${key}" contenteditable="false">${cell || ' '}</td>`;
                 });
                 tableHtml += '</tr>';
             });
@@ -134,6 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    
+    
     
     function filterTable() {
         const searchValue = document.getElementById('search-bar').value.toLowerCase();
@@ -158,11 +160,42 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function handleEdit() {
         document.querySelectorAll('td[contenteditable="false"]').forEach(td => {
+            const columnName = td.getAttribute('data-column-name');
             td.setAttribute('contenteditable', 'true');
+            
+            if (['PRELIM_GRADE', 'MIDTERM_GRADE', 'FINAL_GRADE'].includes(columnName)) {
+                // Add input validation event listeners
+                td.addEventListener('blur', function() {
+                    const allowedValues = ["INC", "N/A", "OD", "UW", "NA", "UD"];
+                    const inputValue = this.textContent.trim();
+    
+                    if (!allowedValues.includes(inputValue) && isNaN(inputValue)) {
+                        alert("Random characters or text are not allowed. Please check the input guide below by scrolling down.");
+                        this.textContent = '';
+                        const symbolTextElement = document.getElementById('symbol-text');
+                        if (symbolTextElement) {
+                            symbolTextElement.scrollIntoView();
+                        }
+                    } else if (!isNaN(inputValue)) {
+                        let numericValue = parseFloat(inputValue);
+                        if (numericValue >= 100 && numericValue <= 500) {
+                            this.textContent = (numericValue / 100).toFixed(2);
+                        } else if (numericValue > 5.00) {
+                            alert("Please make sure that the data you entered is based on the grades that the teacher gave.");
+                            this.textContent = '';
+                        } else {
+                            this.textContent = numericValue.toFixed(2);
+                        }
+                    }
+                });
+            }
         });
+    
         document.getElementById('edit-button').style.display = 'none';
         document.getElementById('save-button').style.display = 'inline';
     }
+    
+    
     
     function handleSave() {
         document.querySelectorAll('tr[data-index]').forEach(row => {
