@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -15,6 +15,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 let isSigningIn = false;
 
 // login.js
@@ -55,6 +56,33 @@ document.querySelector('form').addEventListener('submit', async (e) => {
     isSigningIn = false;
   }
 });
+
+// Add Google Sign-In
+document.getElementById('google-signin-button').addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    console.log(user);
+
+    // Reference to the collection using the value of studentEmail
+    const colRef = collection(db, user.email);
+    const querySnapshot = await getDocs(colRef);
+
+    if (querySnapshot.docs.length > 0) {
+      // Collection exists and has at least one document
+      setStudentEmail(user.email);
+      window.location.href = 'studentform.html';
+    } else {
+      // Collection does not exist or is empty
+      setStudentEmail(user.email);
+      window.location.href = 'main.html';
+    }
+  } catch (error) {
+    console.error(error);
+    swal("LOGIN FAILED!", "USER DATA NOT FOUND!", "error");
+  }
+});
+
 
 
 document.getElementById('show-password').addEventListener('change', (e) => {

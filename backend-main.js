@@ -152,3 +152,23 @@ function resetPage() {
     document.getElementById('search-bar').style.display = "none";
     document.getElementById('drop-zone').style.display = "flex";
 }
+
+  fetch('https://api.mailtrap.io/api/v1/compose', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'd2bedc382294ee365c7b8b619c822b78'
+    },
+    body: JSON.stringify({
+    from: 'renatoablao24@gmail.com',
+    to: 'emmanuelablao16@gmail.com',
+      subject: 'Hello from Mailtrap',
+      body: 'This is a test email sent from Mailtrap.'
+    })
+  })
+  .then(response => response.json())
+  .then(data => console.log('Email sent successfully:', data))
+  .catch(error => {
+    console.error('Error sending email:', error);
+    console.error('Error details:', error.message, error.stack);
+  });
