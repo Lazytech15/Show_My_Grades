@@ -114,7 +114,7 @@ function filterTable() {
     const rows = document.querySelectorAll('tbody tr');
     let found = false;
     rows.forEach(row => {
-        const courseCode = row.querySelector('td[data-label="COURSE_CODE"]').textContent.toLowerCase();
+        const courseCode = row.querySelector('td[data-label="COURSE CODE"]').textContent.toLowerCase();
         if (courseCode.includes(searchValue)) {
             row.style.display = '';
             found = true;
