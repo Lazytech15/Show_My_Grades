@@ -213,6 +213,9 @@ body.dark-mode th{
        font-size:var(--ts-ss) ;
        color: var(--w-c);
     }
+    section{
+      height: 80vh;
+    }
     .table-container {
         width: 100%;
         overflow-x: auto;
