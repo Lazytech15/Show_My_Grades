@@ -309,6 +309,11 @@ body.dark-mode #upload-button:hover{
    position: initial;
    margin-top: 50px;
   }
+   td {
+      padding: 15px;
+      color: var(--w-c);
+      font-size: 9px;
+   }
    /* dark-mode */
    body.dark-mode .nav-bar-container{
       background-color: var(--p-c);
