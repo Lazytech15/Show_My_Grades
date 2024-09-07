@@ -330,5 +330,12 @@ body.dark-mode #upload-button:hover{
    body.dark-mode .nav-bar-container{
       background-color: var(--p-c);
    }
+   body.dark-mode td:first-child{
+      background-color: var(--p-c);
+      color: var(--w-c);
+   }
+   body.dark-mode td{
+      color: var(--w-c);
+   }
 }
 
