@@ -233,7 +233,12 @@ body.dark-mode th{
         margin-bottom: 10px;
         border: 1px solid #ccc;
     }
-    
+    td:first-child {
+      background-color: var(--o-c);
+      color: var(--w-c);
+      font-weight: 900;
+      font-size: var(--ts-ss);
+    }
     td {
         display: block;
         text-align: right;
@@ -241,6 +246,9 @@ body.dark-mode th{
         position: relative;
         box-sizing: border-box;
         border-bottom: 1px solid #eee;
+        padding: 15px;
+        color: var(--b-c);
+        font-size: 9px;
     }
     
     td::before {
@@ -254,18 +262,14 @@ body.dark-mode th{
         box-sizing: border-box;
         white-space: nowrap;
     }
-    
-    /* Add some padding and background color for better readability */
-    td {
-        padding: 15px;
-        color: var(--w-c);
-        font-size: 9px;
-    }
     /* dark-mode */
     body.dark-mode .nav-bar-container{
        background-color: var(--p-c);
     }
     body.dark-mode td{
         color: var(--w-c);
+    }
+    body.dark-mode td:first-child {
+      background-color: var(--p-c);
     }
 }

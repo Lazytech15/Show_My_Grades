@@ -42,55 +42,72 @@ getDocs(colRef)
 
     document.getElementById('search-bar').addEventListener('input', filterTable);
 
-// Function to create the table
-function createTable(data) {
-    // Show loading indicator
-    document.getElementById('loader-container').style.display = 'block';
-
-    // Define the desired order of keys
-    const desiredOrder = [
-        'STUDENT_NUM', 'STUDENT_NAME', 'SECTION', 'EMAIL', 'TRIMESTER', 'DAY', 'TIME', 'COURSE_CODE', 'COURSE_DESCRIPTION',
-        'PRELIM_GRADE', 'MIDTERM_GRADE', 'FINAL_GRADE', 'CREDIT_UNITS', 'FACULTY_NAME'
-    ];
-
-    // Rearrange and filter the data
-    const rearrangedData = data.map(row => {
-        let newRow = {};
-        desiredOrder.forEach(key => {
-            newRow[key] = row[key] || ' ';
-        });
-        return newRow;
-    });
-
-    // Generate the table HTML
-    let tableHtml = '<table>';
-    if (rearrangedData.length > 0) {
-        // Create table headers
-        tableHtml += '<thead><tr>';
-        desiredOrder.forEach(key => {
-            tableHtml += `<th>${key}</th>`;
-        });
-        tableHtml += '</tr></thead>';
-
-        // Create table rows
-        tableHtml += '<tbody>';
-        rearrangedData.forEach((row, index) => {
-            tableHtml += `<tr data-index="${index}">`;
-            Object.entries(row).forEach(([key, cell]) => {
-                // Insert non-breaking space if cell is empty
-                tableHtml += `<td data-label="${key}" contenteditable="false">${cell}</td>`;
+    function createTable(data) {
+        // Show loading indicator
+        document.getElementById('loader-container').style.display = 'block';
+    
+        // Define the desired order of keys and their display names
+        const desiredOrder = [
+            'COURSE_CODE', 'STUDENT_NUM', 'STUDENT_NAME', 'COURSE_DESCRIPTION', 'SECTION', 'EMAIL', 'TRIMESTER', 'DAY', 'TIME',
+            'PRELIM_GRADE', 'MIDTERM_GRADE', 'FINAL_GRADE', 'CREDIT_UNITS', 'FACULTY_NAME'
+        ];
+    
+        const displayNames = {
+            'COURSE_CODE': 'COURSE CODE',
+            'STUDENT_NUM': 'STUDENT NUMBER',
+            'STUDENT_NAME': 'STUDENT NAME',
+            'COURSE_DESCRIPTION': 'COURSE DESCRIPTION',
+            'SECTION': 'SECTION',
+            'EMAIL': 'EMAIL',
+            'TRIMESTER': 'TRIMESTER',
+            'DAY': 'DAY',
+            'TIME': 'TIME',
+            'PRELIM_GRADE': 'PRELIM GRADE',
+            'MIDTERM_GRADE': 'MIDTERM GRADE',
+            'FINAL_GRADE': 'FINAL GRADE',
+            'CREDIT_UNITS': 'CREDIT UNITS',
+            'FACULTY_NAME': 'FACULTY NAME'
+        };
+    
+        // Rearrange and filter the data
+        const rearrangedData = data.map(row => {
+            let newRow = {};
+            desiredOrder.forEach(key => {
+                newRow[key] = row[key] || ' ';
             });
-            tableHtml += '</tr>';
+            return newRow;
         });
-        tableHtml += '</tbody>';
+    
+        // Generate the table HTML
+        let tableHtml = '<table>';
+        if (rearrangedData.length > 0) {
+            // Create table headers
+            tableHtml += '<thead><tr>';
+            desiredOrder.forEach(key => {
+                tableHtml += `<th>${displayNames[key]}</th>`;
+            });
+            tableHtml += '</tr></thead>';
+    
+            // Create table rows
+            tableHtml += '<tbody>';
+            rearrangedData.forEach((row, index) => {
+                tableHtml += `<tr data-index="${index}">`;
+                Object.entries(row).forEach(([key, cell]) => {
+                    // Insert non-breaking space if cell is empty
+                    tableHtml += `<td data-label="${displayNames[key]}" contenteditable="false">${cell}</td>`;
+                });
+                tableHtml += '</tr>';
+            });
+            tableHtml += '</tbody>';
+        }
+        tableHtml += '</table>';
+        document.getElementById('csv-table-container').innerHTML = tableHtml;
+    
+        // Hide loading indicator
+        document.getElementById('loader-container').style.display = 'none';
+        document.getElementById('search-bar').style.display = 'flex';
     }
-    tableHtml += '</table>';
-    document.getElementById('csv-table-container').innerHTML = tableHtml;
-
-    // Hide loading indicator
-    document.getElementById('loader-container').style.display = 'none';
-    document.getElementById('search-bar').style.display = 'flex';
-}
+    
 
 function filterTable() {
     const searchValue = document.getElementById('search-bar').value.toLowerCase();
