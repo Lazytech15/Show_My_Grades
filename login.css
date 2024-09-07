@@ -108,11 +108,17 @@ form button:hover{
     background-color: transparent;
     border-style: none;
     margin-top: 20px;
+    cursor: pointer;
+    transition: all 0.5s;
+}
+#google-signin-button:hover{
+   filter:drop-shadow(0px 0px 3px #000)
 }
 #google-signin-button img{
     width: 30px;
     height: 30px; 
 }
+
 #googlep{
     font-family: "Roboto Slab", serif;
     font-size: var(--ts-ss);
