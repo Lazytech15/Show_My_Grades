@@ -143,7 +143,7 @@ th {
    right: 40px;
 }
 
-#edit-button ,#upload-button , #save-button{
+.table-button{
    padding: 10px;
    width: 100px;
    text-transform: uppercase;
@@ -157,7 +157,7 @@ th {
    margin-top: 10px;
    cursor: pointer;
 }
-#edit-button:hover,#upload-button:hover,#save-button:hover{
+#edit-button:hover,#upload-button:hover,#save-button:hover,#delete-button:hover,#undo-button:hover{
    background-color: var(--lbh-c);
 }
 body.dark-mode #save-button{
@@ -178,12 +178,20 @@ body.dark-mode #save-button:hover{
 body.dark-mode #upload-button:hover{
    background-color: var(--dbh-c);
 }
+body.dark-mode #delete-button:hover{
+   background-color: var(--dbh-c);
+}
+body.dark-mode #undo-button:hover{
+   background-color: var(--dbh-c);
+}
 #search-bar{
    padding: 5px;
    text-align: center;
    font-family: "Open Sans", sans-serif;
    font-weight: 700;
    border-radius: 5px;
+   margin-left: 50px;
+   margin-bottom: 5px;
 }
 #loading-indicator {
    position: absolute;
@@ -299,6 +307,9 @@ body.dark-mode #upload-button:hover{
  body.dark-mode th{
    background-color: var(--p-c);
 }
+body.dark-mode .table-button{
+   background-color: var(--p-c);
+}
 @media screen and (max-width:700px) {
    .nav-bar-container{
       margin: initial;
@@ -314,7 +325,8 @@ body.dark-mode #upload-button:hover{
    }
    .nav-bar-container ul{
       display: flex;
-      justify-content: space-between;
+      justify-content: space-evenly;
+      gap: 70%;
    }
    .nav-bar-container a{
       font-size:var(--ts-ss);
@@ -323,6 +335,7 @@ body.dark-mode #upload-button:hover{
    .table-container {
       width: 100%;
       overflow-x: auto;
+      max-height: 650px;
    }
    table {
       width: 100%;
@@ -370,10 +383,32 @@ body.dark-mode #upload-button:hover{
   }
    .table-buttons{
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      position: initial;
-      margin-top: 50px;
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translate(-50%);
+      right: initial;
+      gap: 15px;
+   }
+   .table-button{
+      justify-content: center;
+      font-size: 9px;
+      width: 80px;
+      border-radius: 5px;
+   }
+   #search-bar{
+      position: fixed;
+      bottom: 11px;
+      width: 60%;
+      left: 50%;
+      transform: translate(-50%);
+      margin-left: initial;
+      border: none;
+   }
+   #search-bar:focus{
+      outline: none;
    }
    /* dark-mode */
    body.dark-mode .nav-bar-container{
@@ -385,6 +420,9 @@ body.dark-mode #upload-button:hover{
    }
    body.dark-mode td{
       color: var(--w-c);
+   }
+   body.dark-mode .table-button{
+      background-color: var(--p-c);
    }
 }
 

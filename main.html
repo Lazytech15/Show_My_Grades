@@ -29,12 +29,16 @@
                 <p>Drag & drop files here or click to upload</p>
                 <input type="file" id="file-input" accept=".csv, .xls, .xlsx" style="display: none;">
             </div>
+            <input type="text" id="search-bar" placeholder="STUDENT ID" style="display: none;">
             <div id="csv-table-container" class="table-container"></div>
             <div class="table-buttons">
-                <input type="text" id="search-bar" placeholder="STUDENT ID" style="display: none;">
                 <button class="table-button" id="save-button" style="display: none;">save</button>
                 <button class="table-button" id="edit-button" style="display: none;">edit</button>
+                <button class="table-button" id="delete-button" style="display: none;">Delete</button>
+                <button class="table-button" id="undo-button" style="display: none;">Undo</button>
                 <button class="table-button" id="upload-button" style="display: none;">upload</button>
+                
+                
             </div>
             <div id="loading-indicator" style="display: none;">
                 <div class="ripple"></div>
