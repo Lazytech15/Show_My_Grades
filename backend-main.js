@@ -15,6 +15,68 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+import { getStudentEmail } from './dataModule.js';
+
+const studentEmail = getStudentEmail();
+const adminEmail = "admin-account"; 
+
+// Reference to the collection using the value of studentEmail
+const colRef = collection(db, adminEmail);
+
+// Array to hold the document data
+let documentsArray = [];
+
+// Function to goBack to the login page
+function goBack() {
+    window.location.href = "index.html";
+}
+
+// Get all documents id to the collection
+async function fetchDocuments() {
+    const maxRetries = 3;
+    const retryDelay = 2000;
+    let retries = 0;
+
+    try {
+        document.getElementById('pageloader-container').style.display = 'flex';
+
+        while (retries < maxRetries) {
+            try {
+                const snapshot = await getDocs(colRef);
+                let adminEmailExists = false;
+
+                snapshot.docs.forEach((doc) => {
+                    documentsArray.push({ id: doc.id, ...doc.data() });
+                    if (doc.id === studentEmail) {
+                        adminEmailExists = true;
+                    }
+                });
+
+                if (!adminEmailExists) {
+                    swal("SYSTEM NOTICE!", "Oops, you are not a teacher nor admin! redirecting to login page", "error")
+                        .then(() => {
+                            goBack();
+                        });
+                }
+
+                break; 
+            } catch (error) {
+                retries++;
+                if (retries === maxRetries) {
+                    throw error;
+                }
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+            }
+        }
+    } catch (e) {
+        swal("ERROR!", "Failed to fetch documents. Please try again.", "error");
+    } finally {
+        document.getElementById('pageloader-container').style.display = 'none';
+    }
+}
+
+// Call fetchDocuments when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', fetchDocuments);
 
 
 const addDataToFirestore = async () => {
@@ -152,23 +214,3 @@ function resetPage() {
     document.getElementById('search-bar').style.display = "none";
     document.getElementById('drop-zone').style.display = "flex";
 }
-
-  fetch('https://api.mailtrap.io/api/v1/compose', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'd2bedc382294ee365c7b8b619c822b78'
-    },
-    body: JSON.stringify({
-    from: 'renatoablao24@gmail.com',
-    to: 'emmanuelablao16@gmail.com',
-      subject: 'Hello from Mailtrap',
-      body: 'This is a test email sent from Mailtrap.'
-    })
-  })
-  .then(response => response.json())
-  .then(data => console.log('Email sent successfully:', data))
-  .catch(error => {
-    console.error('Error sending email:', error);
-    console.error('Error details:', error.message, error.stack);
-  });

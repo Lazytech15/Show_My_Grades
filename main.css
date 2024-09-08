@@ -234,6 +234,55 @@ body.dark-mode #upload-button:hover{
    }
 }
 
+.pageloader-container {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: 80vh;
+}
+
+.fading-bars {
+   display: flex;
+   justify-content: space-between;
+   width: 80px;
+}
+
+.bar {
+   width: 10px;
+   height: 40px;
+   background-color: #FF5C35;
+   animation: fade 1s infinite;
+}
+
+.bar:nth-child(1) {
+   animation-delay: 0s;
+}
+
+.bar:nth-child(2) {
+   animation-delay: 0.2s;
+}
+
+.bar:nth-child(3) {
+   animation-delay: 0.4s;
+}
+
+.bar:nth-child(4) {
+   animation-delay: 0.6s;
+}
+
+.bar:nth-child(5) {
+   animation-delay: 0.8s;
+}
+
+@keyframes fade {
+   0%, 100% {
+       opacity: 0;
+   }
+   50% {
+       opacity: 1;
+   }
+}
+
  /* dark-mode */
 
  body.dark-mode{
