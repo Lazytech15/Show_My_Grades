@@ -15,7 +15,6 @@ body{
     background-color: var(--w-c);
     display: flex;
     flex-direction: column;
-    text-align: center;
 }
 .login-text{
     display: flex;
@@ -122,6 +121,7 @@ form button:hover{
 #googlep{
     font-family: "Roboto Slab", serif;
     font-size: var(--ts-ss);
+    text-align: center;
 }
 
 #loading-indicator {
