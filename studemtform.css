@@ -194,6 +194,10 @@ body.dark-mode th{
     background-color: var(--p-c);
     }
  @media screen and (max-width:700px) {
+   header{
+      display: flex;
+      justify-content: center;
+   }
     .nav-bar-container{
        margin: initial;
        position: fixed;
@@ -207,8 +211,9 @@ body.dark-mode th{
        color: var(--w-c);
     }
     .nav-bar-container ul{
-       display: flex;
-       justify-content: space-between;
+      display: flex;
+      justify-content: space-evenly;
+      gap: 70%;
     }
     .nav-bar-container a{
        font-size:var(--ts-ss) ;
@@ -220,6 +225,7 @@ body.dark-mode th{
     .table-container {
         width: 100%;
         overflow-x: auto;
+        max-height:650px ;
     }
     
     table {
@@ -266,6 +272,18 @@ body.dark-mode th{
         box-sizing: border-box;
         white-space: nowrap;
     }
+    #search-bar{
+      position: fixed;
+      bottom: 16px;
+      width: 60%;
+      left: 50%;
+      transform: translate(-50%);
+      margin-left: initial;
+      border: none;
+   }
+   #search-bar:focus{
+      outline: none;
+   }
     /* dark-mode */
     body.dark-mode .nav-bar-container{
        background-color: var(--p-c);

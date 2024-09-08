@@ -138,6 +138,14 @@ const addDataToFirestore = async () => {
                       console.error("Error creating password document in Firestore: ", error);
                       throw error; // Stop execution if document creation fails
                   }
+                  try {
+                    // Create a new document in Firestore with only the document ID
+                    await setDoc(doc(db, "student-account", studentEmail), {});
+                    console.log("Document created successfully in Firestore: ", studentEmail);
+                  } catch (error) {
+                    console.error("Error creating document in Firestore: ", error);
+                    throw error; // Stop execution if document creation fails
+                  }                         
               }
           }
       }

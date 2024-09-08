@@ -304,6 +304,11 @@ body.dark-mode #undo-button:hover{
  body.dark-mode .nav-bar-container a{
     color: var(--w-c);
  }
+ body.dark-mode #drop-zone {
+   border-color: var(--dbh-c);
+   color: var(--p-c);
+   font-weight: 900;
+ }
  body.dark-mode th{
    background-color: var(--p-c);
 }
@@ -311,6 +316,10 @@ body.dark-mode .table-button{
    background-color: var(--p-c);
 }
 @media screen and (max-width:700px) {
+   header{
+      display: flex;
+      justify-content: center;
+   }
    .nav-bar-container{
       margin: initial;
       position: fixed;
