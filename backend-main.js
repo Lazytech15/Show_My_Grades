@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
 import { getAuth, signOut, createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyC8tDVbDIrKuylsyF3rbDSSPlzsEHXqZIs",
@@ -31,6 +31,11 @@ function goBack() {
     window.location.href = "index.html";
 }
 
+// Function to redirect to admin page
+function redirectToAdmin() {
+    window.location.href = "admin.html";
+}
+
 // Get all documents id to the collection
 async function fetchDocuments() {
     const maxRetries = 3;
@@ -59,6 +64,11 @@ async function fetchDocuments() {
                         });
                 }
 
+                // Check if the last 10 characters of the email contain @admin.com
+                if (studentEmail.slice(-10) === '@admin.com') {
+                    redirectToAdmin();
+                }
+
                 break; 
             } catch (error) {
                 retries++;
@@ -75,6 +85,7 @@ async function fetchDocuments() {
     }
 }
 
+
 // Call fetchDocuments when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', fetchDocuments);
 
@@ -85,6 +96,7 @@ const addDataToFirestore = async () => {
 
   const uploadData = async (data, retries = 0) => {
     try {
+        const studname = data.STUDENT_NAME;
         const studentEmail = data.EMAIL;
         const courseCode = data.COURSE_CODE;
         const auth = getAuth(app);
@@ -140,7 +152,7 @@ const addDataToFirestore = async () => {
                   }
                   try {
                     // Create a new document in Firestore with only the document ID
-                    await setDoc(doc(db, "student-account", studentEmail), {});
+                    await setDoc(doc(db, "student-account", studentEmail), {STUDENT_NAME:studname, CREATEAT: serverTimestamp()});
                     console.log("Document created successfully in Firestore: ", studentEmail);
                   } catch (error) {
                     console.error("Error creating document in Firestore: ", error);

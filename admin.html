@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="/admin.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="general.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <section class="dashboard">
+    <aside class="dashboard" id="dashboard" style="display: none;">
         <article class="sidebar">
             <h3>Dashboard</h3>
             <ul>
@@ -20,16 +21,42 @@
                 <li><a href="#">Delete Account</a></li>
             </ul>
         </article>
-        <figure>
-            <canvas id="myChart" width="300" height="300"></canvas>
-        </figure>
+        <div class="pageloader-container" id="pageloader-container">
+            <div class="fading-bars">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </div>
+    </aside>
+    <section class="chart-container" id="chart-container" style="display: none;">
+            <div class="donut-container">
+                <div class="labels-column">
+                <h2>Account Summary</h2>
+                <p>Admin Accounts: <span id="adminCount"></span></p>
+                <p>Student Accounts: <span id="studentCount"></span></p>
+                <p>Teacher Accounts: <span id="teacherCount"></span></p>
+                </div>
+                <div class="donut-column">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+            <div class="barchart-container">
+                <div class="bar-column">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
     </section>
+    <section class="table-section" id="table-section" style="display: none;">
+        <input type="text" id="search-bar" placeholder="STUDENT ID">
+        <div id="csv-table-container" class="table-container"></div>
+    </section>
+    
     <script src="https://firebase.google.com/docs/web/setup#available-libraries"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/7.14.1-0/firebase.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script type="module" src="admin.js"></script>
-    <script>
-        
-    </script>
 </body>
 </html>
