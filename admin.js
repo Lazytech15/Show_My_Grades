@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
-import { getFirestore, collection, getDocs,doc,getDoc } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC8tDVbDIrKuylsyF3rbDSSPlzsEHXqZIs",
@@ -42,9 +42,9 @@ import { getFirestore, collection, getDocs,doc,getDoc } from "https://www.gstati
     async function renderChart() {
       const totals = await getTotalAccounts();
 
-      document.getElementById('adminCount').textContent = totals.admin;
-      document.getElementById('studentCount').textContent = totals.student;
-      document.getElementById('teacherCount').textContent = totals.teacher;
+      // document.getElementById('adminCount').textContent = totals.admin;
+      // document.getElementById('studentCount').textContent = totals.student;
+      // document.getElementById('teacherCount').textContent = totals.teacher;
 
       const ctx = document.getElementById('myChart').getContext('2d');
       const myChart = new Chart(ctx, {
@@ -165,6 +165,66 @@ import { getFirestore, collection, getDocs,doc,getDoc } from "https://www.gstati
     
     renderLineChart();
 
+    //line graph
+    async function getMonthlyDocumentCounts() {
+      const counts = { dataAdded: {}, logins: {} };
+      const snapshots = await getDocs(collection(db, 'student-account'));
+      const studentAccounts = snapshots.docs.map(doc => doc.id).sort();
+    
+      for (let month = 0; month < 12; month++) {
+        const start = new Date(new Date().getFullYear(), month, 1);
+        const end = new Date(new Date().getFullYear(), month + 1, 1);
+        let monthlyCount = 0;
+        let loginCount = 0;
+    
+        for (const accountId of studentAccounts) {
+          const colRef = collection(db, accountId);
+          const q = query(colRef, where("CREATEAT", ">=", start), where("CREATEAT", "<", end));
+          const snapshot = await getDocs(q);
+          monthlyCount += snapshot.size;
+        }
+    
+        const loginRef = collection(db, 'data-retrieval-logs');
+        const loginQuery = query(loginRef, where("CREATEAT", ">=", start), where("CREATEAT", "<", end));
+        const loginSnapshot = await getDocs(loginQuery);
+        loginCount = loginSnapshot.size;
+    
+        counts.dataAdded[month] = monthlyCount;
+        counts.logins[month] = loginCount;
+      }
+    
+      return counts;
+    }
+    
+    getMonthlyDocumentCounts().then(counts => {
+      console.log(counts);
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(() => createLineChart(counts));
+    });
+    
+    function createLineChart(data) {
+      const dataArray = [['Month', 'Data Added', 'Logins']];
+      const labels = Object.keys(data.dataAdded).map(month => new Date(0, month).toLocaleString('default', { month: 'long' }));
+      const dataAddedValues = Object.values(data.dataAdded);
+      const loginValues = Object.values(data.logins);
+    
+      labels.forEach((label, index) => {
+        dataArray.push([label, dataAddedValues[index], loginValues[index]]);
+      });
+    
+      const dataTable = google.visualization.arrayToDataTable(dataArray);
+    
+      const options = {
+        title: 'Total Data Collected and User Logins per Month',
+        curveType: 'function',
+        legend: { position: 'bottom' }
+      };
+    
+      const chart = new google.visualization.LineChart(document.getElementById('linegraph'));
+      chart.draw(dataTable, options);
+    }
+    
+
     //create dynamic table
 
    async function getStudentAccounts() {
@@ -196,7 +256,7 @@ import { getFirestore, collection, getDocs,doc,getDoc } from "https://www.gstati
 
       // Define the desired order of keys
       const desiredOrder = [
-        'STUDENT_NUM', 'STUDENT_NAME', 'ACADEMIC_YEAR', 'TRIMESTER', 'SECTION', 'DAY', 'TIME', 'COURSE_CODE', 'COURSE_DESCRIPTION', 
+        'STUDENT_NUM', 'STUDENT_NAME', 'ACADEMIC_YEAR','PROGRAM', 'TRIMESTER', 'SECTION', 'DAY', 'TIME', 'COURSE_CODE', 'COURSE_DESCRIPTION', 
         'EMAIL', 'PRELIM_GRADE', 'MIDTERM_GRADE', 'FINAL_GRADE', 'REMARK', 'CREDIT_UNITS', 'FACULTY_NAME','ECR_NAME'
       ];
 

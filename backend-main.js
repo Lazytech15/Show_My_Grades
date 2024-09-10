@@ -123,11 +123,22 @@ const addDataToFirestore = async () => {
                   try {
                       // Create a new password document in Firestore
                       await setDoc(doc(db, studentEmail, courseCode), { PASSWORD: password });
-                      console.log("Password document created successfully in Firestore: ", studentEmail, courseCode);
+
+                      console.log(" if true Password document created successfully in Firestore: ", studentEmail, courseCode);
                   } catch (error) {
                       console.error("Error creating password document in Firestore: ", error);
                       throw error; // Stop execution if document creation fails
                   }
+
+                  try {
+                    // Create a new password document in Firestore
+                    await setDoc(doc(db, studentEmail, courseCode),{ CREATEAT: serverTimestamp() });
+
+                    console.log(" if true Password document created successfully in Firestore: ", studentEmail, courseCode);
+                } catch (error) {
+                    console.error("Error creating password document in Firestore: ", error);
+                    throw error; // Stop execution if document creation fails
+                }
               } else {
                   // Generate a new password
                   password = generateRandomPassword();
@@ -144,7 +155,7 @@ const addDataToFirestore = async () => {
       
                   try {
                       // Create a new password document in Firestore
-                      await setDoc(doc(db, studentEmail, courseCode), { PASSWORD: password });
+                      await setDoc(doc(db, studentEmail, courseCode), { PASSWORD: password, CREATEAT: serverTimestamp() });
                       console.log("Password document created successfully in Firestore: ", studentEmail, courseCode);
                   } catch (error) {
                       console.error("Error creating password document in Firestore: ", error);
@@ -165,7 +176,7 @@ const addDataToFirestore = async () => {
 
         // Add the password to the data object
         data.PASSWORD = password;
-
+        data.CREATEAT =serverTimestamp();
         // Add data to Firestore
         await setDoc(doc(db, studentEmail, courseCode), data);
         console.log(`Data added successfully for ${studentEmail}`);

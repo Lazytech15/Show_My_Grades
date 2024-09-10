@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
 // main.js
@@ -21,24 +21,36 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Reference to the collection using the value of studentEmail
-const colRef = collection(db, studentEmail);
-
-// Array to hold the document data
-let documentsArray = [];
-
-// Get all documents in the collection
-getDocs(colRef)
-    .then((snapshot) => {
-        snapshot.docs.forEach((doc) => {
-            documentsArray.push({ id: doc.id, ...doc.data() });
-        });
-        // Call the createTable function with the documentsArray
-        createTable(documentsArray);
-    })
-    .catch((error) => {
-        console.error("Error getting documents: ", error);
-    });
+async function fetchAndLogDocuments(studentEmail) {
+    // Reference to the collection using the value of studentEmail
+    const colRef = collection(db, studentEmail);
+  
+    // Array to hold the document data
+    let documentsArray = [];
+  
+    try {
+      // Get all documents in the collection
+      const snapshot = await getDocs(colRef);
+      for (const docSnap of snapshot.docs) {
+        documentsArray.push({ id: docSnap.id, ...docSnap.data() });
+        try {
+          // Create a new document in Firestore with only the document ID
+          await setDoc(doc(collection(db, "data-retrieval-logs")), { CREATEAT: serverTimestamp() });
+          console.log("Document created successfully in Firestore: ", studentEmail);
+        } catch (error) {
+          console.error("Error creating document in Firestore: ", error);
+          throw error; // Stop execution if document creation fails
+        }
+      }
+      // Call the createTable function with the documentsArray
+      createTable(documentsArray);
+    } catch (error) {
+      console.error("Error getting documents: ", error);
+    }
+  }
+  
+  // Example usage
+  fetchAndLogDocuments(studentEmail);
 
     document.getElementById('search-bar').addEventListener('input', filterTable);
 
@@ -141,3 +153,39 @@ document.getElementById('index-logout').addEventListener('click', async () => {
 });
 
 
+// // main.js
+// import { getStudentEmail } from './dataModule.js';
+
+
+// const studentEmail =getStudentEmail();
+
+// async function fetchAndLogDocuments(studentEmail) {
+//     // Reference to the collection using the value of studentEmail
+//     const colRef = collection(db, studentEmail);
+  
+//     // Array to hold the document data
+//     let documentsArray = [];
+  
+//     try {
+//       // Get all documents in the collection
+//       const snapshot = await getDocs(colRef);
+//       for (const docSnap of snapshot.docs) {
+//         documentsArray.push({ id: docSnap.id, ...docSnap.data() });
+//         try {
+//           // Create a new document in Firestore with only the document ID
+//           await setDoc(doc(db, "data-retrieval-logs", studentEmail), { CREATEAT: serverTimestamp() });
+//           console.log("Document created successfully in Firestore: ", studentEmail);
+//         } catch (error) {
+//           console.error("Error creating document in Firestore: ", error);
+//           throw error; // Stop execution if document creation fails
+//         }
+//       }
+//       // Call the createTable function with the documentsArray
+//       createTable(documentsArray);
+//     } catch (error) {
+//       console.error("Error getting documents: ", error);
+//     }
+//   }
+  
+//   // Example usage
+//   fetchAndLogDocuments(studentEmail);

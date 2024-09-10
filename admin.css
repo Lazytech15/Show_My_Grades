@@ -102,8 +102,19 @@ body {
     border-radius: 10px;
     box-shadow: 0px 0px 10px var(--b-c);
 }
-#barChart{
-    width: 100%;
+#lineChart{
+    width: 300px;
+    height: 200px;
+}
+.linegraph-container{
+    width: 60%;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px var(--b-c);
+}
+#linegraph{
+    width: 470px;
+    height: 220px;
 }
 
 .table-section {
@@ -114,7 +125,7 @@ body {
 }
 
 .table-container {
-    max-height: 500px;
+    max-height: 450px;
     overflow-x: auto;
     margin: auto;
 }
