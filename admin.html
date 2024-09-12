@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/eye1.png" type="image/x-icon">
     <title>Dashboard</title>
     <link rel="stylesheet" href="admin.css">
     <link rel="stylesheet" href="general.css">
@@ -22,16 +23,27 @@
                 <li><a href="#">Delete Account</a></li>
             </ul>
         </article>
-        <div class="pageloader-container" id="pageloader-container">
-            <div class="fading-bars">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-            </div>
-        </div>
     </aside>
+    <div class="pageloader-container" id="pageloader-container">
+        <div class="fading-bars">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+    </div>
+    <div class="loader-container" id="loader-container" style="display: none;">
+        <div class="flipping-cards">
+            <div class="card">l</div>
+            <div class="card">o</div>
+            <div class="card">a</div>
+            <div class="card">d</div>
+            <div class="card">i</div>
+            <div class="card">n</div>
+            <div class="card">g</div>
+        </div>
+    </div>
     <section class="chart-container" id="chart-container" style="display: none;">
             <div class="donut-container">
                 <!-- <div class="labels-column">
@@ -51,15 +63,28 @@
             </div>
             <div class="linegraph-container">
                 <div class="linegraph-column">
-                    <div id="linegraph"></div>
+                    <canvas id="linegraph"></canvas>
+                    <div id="counts"></div>
                 </div>
             </div>
     </section>
     <section class="table-section" id="table-section" style="display: none;">
-        <input type="text" id="search-bar" placeholder="STUDENT ID">
+        <div class="action-buttons">
+            <input type="text" id="search-bar" placeholder="STUDENT ID">
+            <button class="a-buttons" id="edit-button">Edit</button>
+            <button class="a-buttons" id="delete-button" style="display: none;">Delete</button>
+            <button class="a-buttons" id="undo-button" style="display: none;">Undo</button>
+            <button class="a-buttons" id="save-button"style="display: none;" >Save</button>
+            <button class="a-buttons" id="add-row-button" >Add Data</button>
+            <button class="a-buttons" id="row-save-button" style="display: none;">Save Row</button>
+            <button class="a-buttons" id="update-button" style="display: none;">Update</button>
+            <button id="closebtn" style="display: none;"><img src="assets/closebtn.png" alt=""></button>
+        </div>
         <div id="csv-table-container" class="table-container"></div>
     </section>
-    
+    <section>
+        
+    </section>
     
     <script src="https://firebase.google.com/docs/web/setup#available-libraries"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/7.14.1-0/firebase.js"></script>

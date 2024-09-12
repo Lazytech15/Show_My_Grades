@@ -21,6 +21,9 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Example usage
+fetchAndLogDocuments(studentEmail);
+
 async function fetchAndLogDocuments(studentEmail) {
     // Reference to the collection using the value of studentEmail
     const colRef = collection(db, studentEmail);
@@ -33,14 +36,14 @@ async function fetchAndLogDocuments(studentEmail) {
       const snapshot = await getDocs(colRef);
       for (const docSnap of snapshot.docs) {
         documentsArray.push({ id: docSnap.id, ...docSnap.data() });
-        try {
-          // Create a new document in Firestore with only the document ID
-          await setDoc(doc(collection(db, "data-retrieval-logs")), { CREATEAT: serverTimestamp() });
-          console.log("Document created successfully in Firestore: ", studentEmail);
-        } catch (error) {
-          console.error("Error creating document in Firestore: ", error);
-          throw error; // Stop execution if document creation fails
-        }
+      }
+      try {
+        // Create a new document in Firestore with only the document ID
+        await setDoc(doc(collection(db, "data-retrieval-logs")), { CREATEAT: serverTimestamp() });
+        console.log("Document created successfully in Firestore: ", studentEmail);
+      } catch (error) {
+        console.error("Error creating document in Firestore: ", error);
+        throw error; // Stop execution if document creation fails
       }
       // Call the createTable function with the documentsArray
       createTable(documentsArray);
@@ -49,8 +52,7 @@ async function fetchAndLogDocuments(studentEmail) {
     }
   }
   
-  // Example usage
-  fetchAndLogDocuments(studentEmail);
+  
 
     document.getElementById('search-bar').addEventListener('input', filterTable);
 
