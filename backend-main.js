@@ -19,9 +19,11 @@ import { getStudentEmail } from './dataModule.js';
 
 const studentEmail = getStudentEmail();
 const adminEmail = "admin-account"; 
+const teacherEmail = "teacher-account"; 
 
 // Reference to the collection using the value of studentEmail
 const colRef = collection(db, adminEmail);
+const teacherRef = collection(db, teacherEmail);
 
 // Array to hold the document data
 let documentsArray = [];
@@ -48,18 +50,28 @@ async function fetchDocuments() {
         while (retries < maxRetries) {
             try {
                 const snapshot = await getDocs(colRef);
-                let adminEmailExists = false;
+                const teachersnapshot = await getDocs(teacherRef);
+                let accountEmailExists = false;
 
                 snapshot.docs.forEach((doc) => {
                     documentsArray.push({ id: doc.id, ...doc.data() });
                     if (doc.id === studentEmail) {
-                        adminEmailExists = true;
+                        accountEmailExists = true;
+                    }else{
+                        teachersnapshot.docs.forEach((doc) => {
+                            documentsArray.push({ id: doc.id, ...doc.data() });
+                            if (doc.id === studentEmail) {
+                                accountEmailExists = true;
+                            }
+                        });
                     }
+
                 });
 
-                if (!adminEmailExists) {
+                if (!accountEmailExists) {
                     swal("SYSTEM NOTICE!", "Oops, you are not a teacher nor admin! redirecting to login page", "error")
-                        .then(() => {
+                        .then(async () => {
+                            await deleteGoogleAccount();
                             goBack();
                         });
                 }
@@ -82,6 +94,21 @@ async function fetchDocuments() {
         swal("ERROR!", "Failed to fetch documents. Please try again.", "error");
     } finally {
         document.getElementById('pageloader-container').style.display = 'none';
+    }
+}
+
+async function deleteGoogleAccount() {
+    const user = auth.currentUser;
+
+    if (user) {
+        try {
+            await user.delete();
+            console.log("Google account deleted successfully.");
+        } catch (error) {
+            console.error("Error deleting Google account: ", error);
+        }
+    } else {
+        console.error("No user is currently signed in.");
     }
 }
 

@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs, writeBatch,doc, getDoc, deleteDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
+import { signOut,getAuth } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs, writeBatch,doc, getDoc, deleteDoc, serverTimestamp,setDoc} from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC8tDVbDIrKuylsyF3rbDSSPlzsEHXqZIs",
@@ -12,7 +13,9 @@ import { getFirestore, collection, query, where, getDocs, writeBatch,doc, getDoc
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     async function fetchDocuments() {
       const maxRetries = 3;
@@ -25,243 +28,178 @@ import { getFirestore, collection, query, where, getDocs, writeBatch,doc, getDoc
           while (retries < maxRetries) {
               try { 
 
-                //create a donut
-
-    async function getTotalAccounts() {
-      const adminSnapshot = await getDocs(collection(db, 'admin-account'));
-      const studentSnapshot = await getDocs(collection(db, 'student-account'));
-      const teacherSnapshot = await getDocs(collection(db, 'teacher-account'));
-
-      return {
-        admin: adminSnapshot.size,
-        student: studentSnapshot.size,
-        teacher: teacherSnapshot.size
-      };
-    }
-
-    async function renderChart() {
-      const totals = await getTotalAccounts();
-
-      // document.getElementById('adminCount').textContent = totals.admin;
-      // document.getElementById('studentCount').textContent = totals.student;
-      // document.getElementById('teacherCount').textContent = totals.teacher;
-
-      const ctx = document.getElementById('myChart').getContext('2d');
-      const myChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Admin Accounts', 'Student Accounts', 'Teacher Accounts'],
-          datasets: [{
-            label: '# of Accounts',
-            data: [totals.admin, totals.student, totals.teacher],
-            backgroundColor: [
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(255, 206, 86, 0.2)'
-            ],
-            borderColor: [
-              'rgba(75, 192, 192, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          cutout: '50%', // This creates the donut effect
-        }
-      });
-    }
-
-    renderChart();
-
-    //create a linebar
-
-    async function getAccountDates(collectionName) {
-      const accountSnapshot = await getDocs(collection(db, collectionName));
-      const accountDates = [];
-    
-      accountSnapshot.forEach(doc => {
-        const data = doc.data();
-        // console.log(`Document data from ${collectionName}:`, data); 
-        if (data.CREATEAT) {
-          accountDates.push(data.CREATEAT.toDate());
-        }
-      });
-    
-      // console.log(`Account Dates from ${collectionName}:`, accountDates); 
-      return accountDates;
-    }
-    
-    async function renderLineChart() {
-      const studentCreateDates = await getAccountDates('student-account');
-      const deleteAccountDates = await getAccountDates('delete-account');
-    
-      // Convert dates to a format suitable for charting (e.g., month and year)
-      const formatDates = dates => dates.map(date => `${date.getMonth() + 1}/${date.getFullYear()}`);
-      const formattedCreateDates = formatDates(studentCreateDates);
-      const formattedDeleteDates = formatDates(deleteAccountDates);
-    
-      const countDates = dates => dates.reduce((acc, date) => {
-        acc[date] = (acc[date] || 0) + 1;
-        return acc;
-      }, {});
-    
-      const createDateCounts = countDates(formattedCreateDates);
-      const deleteDateCounts = countDates(formattedDeleteDates);
-    
-      const createLabels = Object.keys(createDateCounts);
-      const createData = Object.values(createDateCounts);
-    
-      const deleteLabels = Object.keys(deleteDateCounts);
-      const deleteData = Object.values(deleteDateCounts);
-    
-      const ctx = document.getElementById('lineChart').getContext('2d');
-      const lineChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: [...new Set([...createLabels, ...deleteLabels])], // Combine labels
-          datasets: [
-            {
-              label: '# of Accounts Created',
-              data: createLabels.map(label => createDateCounts[label] || 0),
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              borderColor: 'rgba(75, 192, 192, 1)',
-              borderWidth: 1,
-              fill: false,
-              tension: 0.1
-            },
-            {
-              label: '# of Accounts Deleted',
-              data: deleteLabels.map(label => deleteDateCounts[label] || 0),
-              backgroundColor: 'rgba(255, 99, 132, 0.2)',
-              borderColor: 'rgba(255, 99, 132, 1)',
-              borderWidth: 1,
-              fill: false,
-              tension: 0.1
-            }
-          ]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const index = context.dataIndex;
-                  const date = context.dataset.label.includes('Created') ? studentCreateDates[index] : deleteAccountDates[index];
-                  return `Date: ${date.toLocaleDateString()} - Count: ${context.raw}`;
+                async function getMonthlyDocumentCounts() {
+                  const counts = { dataAdded: {}, logins: {}, studentAccounts: {}, totalAccounts: {} };
+                  const snapshots = await getDocs(collection(db, 'student-account'));
+                  const studentAccounts = snapshots.docs.map(doc => doc.id).sort();
+                
+                  for (let month = 0; month < 12; month++) {
+                    const start = new Date(new Date().getFullYear(), month, 1);
+                    const end = new Date(new Date().getFullYear(), month + 1, 1);
+                    let monthlyCount = 0;
+                    let loginCount = 0;
+                    let studentCount = 0;
+                
+                    for (const accountId of studentAccounts) {
+                      const colRef = collection(db, accountId);
+                      const q = query(colRef, where("CREATEAT", ">=", start), where("CREATEAT", "<", end));
+                      const snapshot = await getDocs(q);
+                      monthlyCount += snapshot.size;
+                    }
+                
+                    const loginRef = collection(db, 'data-retrieval-logs');
+                    const loginQuery = query(loginRef, where("CREATEAT", ">=", start), where("CREATEAT", "<", end));
+                    const loginSnapshot = await getDocs(loginQuery);
+                    loginCount = loginSnapshot.size;
+                
+                    const studentRef = collection(db, 'student-account');
+                    const studentQuery = query(studentRef, where("CREATEAT", ">=", start), where("CREATEAT", "<", end));
+                    const studentSnapshot = await getDocs(studentQuery);
+                    studentCount = studentSnapshot.size;
+                
+                    counts.dataAdded[month] = monthlyCount;
+                    counts.logins[month] = loginCount;
+                    counts.studentAccounts[month] = studentCount;
+                  }
+                
+                  // Get total accounts data
+                  const adminSnapshot = await getDocs(collection(db, 'admin-account'));
+                  const studentSnapshot = await getDocs(collection(db, 'student-account'));
+                  const teacherSnapshot = await getDocs(collection(db, 'teacher-account'));
+                  const deleteSnapshot = await getDocs(collection(db, 'delete-account'));
+                  const loginSnapshot = await getDocs(collection(db, 'data-retrieval-logs'));
+                
+                  counts.totalAccounts = {
+                    admin: adminSnapshot.size,
+                    student: studentSnapshot.size,
+                    teacher: teacherSnapshot.size,
+                    deleted: deleteSnapshot.size,
+                    logins: loginSnapshot.size
+                  };
+                
+                  return counts;
                 }
-              }
-            }
-          }
-        }
-      });
-    }
+                
+                // document.getElementById('loader-container').style.display = 'block'; // Show loading indicator
+                
+                getMonthlyDocumentCounts().then(counts => {
+                  // Calculate the total data added
+                  const totalDataAdded = Object.values(counts.dataAdded).reduce((sum, value) => sum + value, 0);
+                
+                  // Display the total data added
+                  document.getElementById('TdataAdded').textContent = totalDataAdded;
+                
+                  // Display the total accounts data
+                  document.getElementById('deleteAccount').textContent = counts.totalAccounts.deleted;
+                  document.getElementById('studentCount').textContent = counts.totalAccounts.student;
+                  document.getElementById('teacherCount').textContent = counts.totalAccounts.teacher;
+                  document.getElementById('adminCount').textContent = counts.totalAccounts.admin;
+                  document.getElementById('loginCount').textContent = counts.totalAccounts.logins;
+                
+                  // Create the bar chart
+                  createBarChart(counts);
+                
+                  document.getElementById('loader-container').style.display = 'none'; // Hide loading indicator
+                }).catch(error => {
+                  console.error("Error fetching document counts: ", error);
+                  document.getElementById('loader-container').style.display = 'none'; // Hide loading indicator in case of error
+                });
+                getMonthlyDocumentCounts().then(counts => {
+                
+                  // Calculate the total data added
+                  const totalDataAdded = Object.values(counts.dataAdded).reduce((sum, value) => sum + value, 0);
+                
+                  // Display the total data added
+                  document.getElementById('TdataAdded').textContent = totalDataAdded;
+                
+                  // Display the total accounts data
+                  document.getElementById('deleteAccount').textContent = counts.totalAccounts.deleted;
+                  document.getElementById('studentCount').textContent = counts.totalAccounts.student;
+                  document.getElementById('teacherCount').textContent = counts.totalAccounts.teacher;
+                  document.getElementById('adminCount').textContent = counts.totalAccounts.admin;
+                  document.getElementById('loginCount').textContent = counts.totalAccounts.logins;
+                
+                  // Create the bar chart
+                  createBarChart(counts);
+                  console.log("loading");
+                });
+                
+                function createBarChart(data) {
+                  const labels = ['Admin Accounts', 'Student Accounts', 'Teacher Accounts', 'Deleted Accounts', 'Student Data Added', 'Student Log-in'];
+                  const totalAccountsValues = [
+                    data.totalAccounts.admin,
+                    data.totalAccounts.student,
+                    data.totalAccounts.teacher,
+                    data.totalAccounts.deleted,
+                    Object.values(data.dataAdded).reduce((sum, value) => sum + value, 0),
+                    data.totalAccounts.logins
+                    
+                  ];
+                
+                  const canvas = document.getElementById('line-graph');
+                  canvas.width = 400;
+                  canvas.height = 200;
+                  const ctx = canvas.getContext('2d');
+                
+                  new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                      labels: labels,
+                      datasets: [
+                        {
+                          label: 'Total Counts',
+                          data: totalAccountsValues,
+                          backgroundColor: [
+                            'rgba(92, 40, 255, 1)',
+                            'rgba(255, 120, 0, 1)',
+                            'rgba(255, 0, 255, 1)',
+                            'rgba(255, 0, 0, 1)',
+                            'rgba(100, 255, 0, 1)',
+                            'rgba(0, 255, 255, 1)'
+                          ],
+                          borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)'
+                          ],
+                          borderWidth: 1
+                        }
+                      ]
+                    },
+                    options: {
+                      responsive: false, // Set to false to prevent resizing
+                      title: {
+                        display: true,
+                        text: 'Total Accounts and Data Added'
+                      },
+                      scales: {
+                        x: {
+                          display: true,
+                          title: {
+                            display: true,
+                            text: 'Data Gathered'
+                          }
+                        },
+                        y: {
+                          display: true,
+                          title: {
+                            display: true,
+                            text: 'Count'
+                          },
+                          beginAtZero: true
+                        }
+                      }
+                    }
+                  });
+                }
+                                
+                                
+                
+                
     
-    renderLineChart();
-
-    //line graph
-    async function getMonthlyDocumentCounts() {
-      const counts = { dataAdded: {}, logins: {} };
-      const snapshots = await getDocs(collection(db, 'student-account'));
-      const studentAccounts = snapshots.docs.map(doc => doc.id).sort();
-    
-      for (let month = 0; month < 12; month++) {
-        const start = new Date(new Date().getFullYear(), month, 1);
-        const end = new Date(new Date().getFullYear(), month + 1, 1);
-        let monthlyCount = 0;
-        let loginCount = 0;
-    
-        for (const accountId of studentAccounts) {
-          const colRef = collection(db, accountId);
-          const q = query(colRef, where("CREATEAT", ">=", start), where("CREATEAT", "<", end));
-          const snapshot = await getDocs(q);
-          monthlyCount += snapshot.size;
-        }
-    
-        const loginRef = collection(db, 'data-retrieval-logs');
-        const loginQuery = query(loginRef, where("CREATEAT", ">=", start), where("CREATEAT", "<", end));
-        const loginSnapshot = await getDocs(loginQuery);
-        loginCount = loginSnapshot.size;
-    
-        counts.dataAdded[month] = monthlyCount;
-        counts.logins[month] = loginCount;
-      }
-    
-      return counts;
-    }
-    
-    getMonthlyDocumentCounts().then(counts => {
-      console.log(counts);
-      createLineChart(counts);
-      // displayCounts(counts);
-    });
-    
-    function createLineChart(data) {
-      const labels = Object.keys(data.dataAdded).map(month => new Date(0, month).toLocaleString('default', { month: 'long' }));
-      const dataAddedValues = Object.values(data.dataAdded);
-      const loginValues = Object.values(data.logins);
-    
-      const ctx = document.getElementById('linegraph').getContext('2d');
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Data Added',
-              data: dataAddedValues,
-              borderColor: 'rgba(75, 192, 192, 1)',
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              fill: false,
-            },
-            {
-              label: 'Logins',
-              data: loginValues,
-              borderColor: 'rgba(153, 102, 255, 1)',
-              backgroundColor: 'rgba(153, 102, 255, 0.2)',
-              fill: false,
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          title: {
-            display: true,
-            text: 'Total Data Collected and User Logins per Month'
-          },
-          tooltips: {
-            mode: 'index',
-            intersect: false,
-          },
-          hover: {
-            mode: 'nearest',
-            intersect: true
-          },
-          scales: {
-            x: {
-              display: true,
-              title: {
-                display: true,
-                text: 'Month'
-              }
-            },
-            y: {
-              display: true,
-              title: {
-                display: true,
-                text: 'Count'
-              }
-            }
-          }
-        }
-      });
-    }
     
     // function displayCounts(data) {
     //   const container = document.getElementById('counts');
@@ -473,32 +411,6 @@ function undoDelete() {
 
 //end-here
  
-function handleSave() {
-  document.querySelectorAll('tr[data-index]').forEach(row => {
-      const index = row.getAttribute('data-index');
-      const updatedRow = {};
-      row.querySelectorAll('td').forEach(td => {
-          const key = td.getAttribute('data-column-name');
-          updatedRow[key] = td.textContent;
-          td.setAttribute('contenteditable', 'false');
-      });
-      window.filteredDataArray[index] = updatedRow;
-  });
-
-  // Remove deleted rows from window.filteredDataArray
-  deletedRows.forEach(deleted => {
-      delete window.filteredDataArray[deleted.index];
-  });
-
-  // Filter out duplicates
-  window.filteredDataArray = filterDuplicates(window.filteredDataArray);
-
-  // Recreate the table with the filtered data
-  createTable(window.filteredDataArray);
-  document.dispatchEvent(new CustomEvent('dataReady', { detail: window.filteredDataArray }));
-  console.log(window.filteredDataArray);
-}
-
 //Handle add row
 function handleAddRow() {
   const table = document.getElementById('dynamic-table'); // Reference the dynamically created table
@@ -523,10 +435,42 @@ function handleAddRow() {
     input.type = 'text';
     input.name = column;
     input.placeholder = column;
-    input.style.textAlign="center";
     input.style.fontFamily = '"Open Sans", sans-serif';
+    input.style.textAlign = "center";
     input.style.fontWeight = '700';
+    input.style.borderRadius = '2px';
+    input.style.borderStyle = 'none';
+    input.style.margin = '5px';
+    input.style.padding = '5px';
+    input.style.outline = 'none';
     newCell.appendChild(input);
+
+    // Add input validation for specific columns
+    if (['PRELIM_GRADE', 'MIDTERM_GRADE', 'FINAL_GRADE'].includes(column)) {
+      input.addEventListener('blur', function() {
+        const allowedValues = ["INC", "N/A", "OD", "UW", "NA", "UD"];
+        const inputValue = this.value.trim();
+
+        if (!allowedValues.includes(inputValue) && isNaN(inputValue)) {
+          alert("Random characters or text are not allowed. Please check the input guide below by scrolling down.");
+          this.value = '';
+          const symbolTextElement = document.getElementById('symbol-text');
+          if (symbolTextElement) {
+            symbolTextElement.scrollIntoView();
+          }
+        } else if (!isNaN(inputValue)) {
+          let numericValue = parseFloat(inputValue);
+          if (numericValue >= 100 && numericValue <= 500) {
+            this.value = (numericValue / 100).toFixed(2);
+          } else if (numericValue > 5.00) {
+            alert("Please make sure that the data you entered is based on the grades that the teacher gave.");
+            this.value = '';
+          } else {
+            this.value = numericValue.toFixed(2);
+          }
+        }
+      });
+    }
   });
 
   // Show the save button and hide the add button
@@ -557,6 +501,8 @@ function handleAddRow() {
       // Add the new row to the filteredDataArray
       window.filteredDataArray.push(updatedRow);
 
+      alert('Row saved successfully!');
+
       // Hide the save button and show the add button
       document.getElementById('add-row-button').style.display = 'inline';
       document.getElementById('row-save-button').style.display = 'none';
@@ -568,6 +514,34 @@ function handleAddRow() {
       alert('Please fill in all required fields.');
     }
   };
+}
+
+//Handle Save
+
+function handleSave() {
+  document.querySelectorAll('tr[data-index]').forEach(row => {
+    const index = row.getAttribute('data-index');
+    const updatedRow = {};
+    row.querySelectorAll('td').forEach(td => {
+      const key = td.getAttribute('data-column-name');
+      updatedRow[key] = td.textContent;
+      td.setAttribute('contenteditable', 'false');
+    });
+    window.filteredDataArray[index] = updatedRow;
+  });
+
+  // Remove deleted rows from window.filteredDataArray
+  deletedRows.forEach(deleted => {
+    delete window.filteredDataArray[deleted.index];
+  });
+
+  // Filter out duplicates
+  window.filteredDataArray = filterDuplicates(window.filteredDataArray);
+
+  // Recreate the table with the filtered data
+  createTable(window.filteredDataArray);
+  document.dispatchEvent(new CustomEvent('dataReady', { detail: window.filteredDataArray }));
+  console.log(window.filteredDataArray);
 }
 
 // Add event listener to your add row button
@@ -610,7 +584,7 @@ async function handleUpdate() {
         swal("SAVE!", "The data is saved successfully!", "success").then(() => {
           // Hide loading indicator and reload the page
           document.getElementById('pageloader-container').style.display = 'none';
-          // location.reload();
+          location.reload();
         });
   
         // Handle deletions
@@ -727,4 +701,203 @@ function filterTable() {
 }
 
 document.getElementById('search-bar').addEventListener('input', filterTable);
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  try {
+      await signOut(auth);
+      console.log('User signed out successfully');
+      window.location.href = 'index.html';
+  } catch (error) {
+      console.error('Error signing out: ', error);
+  }
+});
+
+
+async function CreateTeacherAccount() {
+  try {
+    // Ensure variables are defined
+    const teacherNameElement = document.getElementById('teachername');
+    const emailElement = document.getElementById('email');
+    const campusElement = document.getElementById('campus');
+    const teacherpassElement = document.getElementById('password');
+
+    const teacherName = teacherNameElement.value;
+    const email = emailElement.value;
+    const campus = campusElement.value;
+    const teacherpass = teacherpassElement.value;
+
+    console.log("Creating user with email:", email);
+    // Store additional user information in Firestore
+
+    await setDoc(doc(db, "teacher-account", email), {
+      CREATEAT: serverTimestamp(),
+      TeacherName: teacherName,
+      Email: email,
+      Campus: campus,
+      teacherpass: teacherpass
+    });
+    swal("SAVE!", "Teacher Registration Success!", "success");
+
+    // Create user with Firebase Authentication
+    const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, teacherpass);
+    const user = userCredential.user;
+
+    // Clear the input fields
+    teacherNameElement.value = "";
+    emailElement.value = "";
+    campusElement.value = "";
+    teacherpassElement.value = "";
+
+  } catch (error) {
+    console.error("Error creating document in Firestore: ", error);
+    swal("Error!", "Failed to register teacher. Please try again.", "error");
+  }
+}
+
+document.getElementById('teacher-save').addEventListener('click', CreateTeacherAccount);
+
+
+
+
+
+
+// //create a donut
+
+// async function getTotalAccounts() {
+//   const adminSnapshot = await getDocs(collection(db, 'admin-account'));
+//   const studentSnapshot = await getDocs(collection(db, 'student-account'));
+//   const teacherSnapshot = await getDocs(collection(db, 'teacher-account'));
+
+//   return {
+//     admin: adminSnapshot.size,
+//     student: studentSnapshot.size,
+//     teacher: teacherSnapshot.size
+//   };
+// }
+
+// async function renderChart() {
+//   const totals = await getTotalAccounts();
+
+//   // document.getElementById('adminCount').textContent = totals.admin;
+//   // document.getElementById('studentCount').textContent = totals.student;
+//   // document.getElementById('teacherCount').textContent = totals.teacher;
+
+//   const ctx = document.getElementById('myChart').getContext('2d');
+//   const myChart = new Chart(ctx, {
+//     type: 'bar',
+//     data: {
+//       labels: ['Admin Accounts', 'Student Accounts', 'Teacher Accounts'],
+//       datasets: [{
+//         label: '# of Accounts',
+//         data: [totals.admin, totals.student, totals.teacher],
+//         backgroundColor: [
+//           'rgba(75, 192, 192, 0.2)',
+//           'rgba(54, 162, 235, 0.2)',
+//           'rgba(255, 206, 86, 0.2)'
+//         ],
+//         borderColor: [
+//           'rgba(75, 192, 192, 1)',
+//           'rgba(54, 162, 235, 1)',
+//           'rgba(255, 206, 86, 1)'
+//         ],
+//         borderWidth: 1
+//       }]
+//     },
+//     options: {
+//       cutout: '50%', // This creates the donut effect
+//     }
+//   });
+// }
+
+// renderChart();
+
+// //create a linebar
+
+// async function getAccountDates(collectionName) {
+//   const accountSnapshot = await getDocs(collection(db, collectionName));
+//   const accountDates = [];
+
+//   accountSnapshot.forEach(doc => {
+//     const data = doc.data();
+//     // console.log(`Document data from ${collectionName}:`, data); 
+//     if (data.CREATEAT) {
+//       accountDates.push(data.CREATEAT.toDate());
+//     }
+//   });
+
+//   // console.log(`Account Dates from ${collectionName}:`, accountDates); 
+//   return accountDates;
+// }
+
+// async function renderLineChart() {
+//   const studentCreateDates = await getAccountDates('student-account');
+//   const deleteAccountDates = await getAccountDates('delete-account');
+
+//   // Convert dates to a format suitable for charting (e.g., month and year)
+//   const formatDates = dates => dates.map(date => `${date.getMonth() + 1}/${date.getFullYear()}`);
+//   const formattedCreateDates = formatDates(studentCreateDates);
+//   const formattedDeleteDates = formatDates(deleteAccountDates);
+
+//   const countDates = dates => dates.reduce((acc, date) => {
+//     acc[date] = (acc[date] || 0) + 1;
+//     return acc;
+//   }, {});
+
+//   const createDateCounts = countDates(formattedCreateDates);
+//   const deleteDateCounts = countDates(formattedDeleteDates);
+
+//   const createLabels = Object.keys(createDateCounts);
+//   const createData = Object.values(createDateCounts);
+
+//   const deleteLabels = Object.keys(deleteDateCounts);
+//   const deleteData = Object.values(deleteDateCounts);
+
+//   const ctx = document.getElementById('lineChart').getContext('2d');
+//   const lineChart = new Chart(ctx, {
+//     type: 'line',
+//     data: {
+//       labels: [...new Set([...createLabels, ...deleteLabels])], // Combine labels
+//       datasets: [
+//         {
+//           label: '# of Accounts Created',
+//           data: createLabels.map(label => createDateCounts[label] || 0),
+//           backgroundColor: 'rgba(75, 192, 192, 0.2)',
+//           borderColor: 'rgba(75, 192, 192, 1)',
+//           borderWidth: 1,
+//           fill: false,
+//           tension: 0.1
+//         },
+//         {
+//           label: '# of Accounts Deleted',
+//           data: deleteLabels.map(label => deleteDateCounts[label] || 0),
+//           backgroundColor: 'rgba(255, 99, 132, 0.2)',
+//           borderColor: 'rgba(255, 99, 132, 1)',
+//           borderWidth: 1,
+//           fill: false,
+//           tension: 0.1
+//         }
+//       ]
+//     },
+//     options: {
+//       scales: {
+//         y: {
+//           beginAtZero: true
+//         }
+//       },
+//       plugins: {
+//         tooltip: {
+//           callbacks: {
+//             label: function(context) {
+//               const index = context.dataIndex;
+//               const date = context.dataset.label.includes('Created') ? studentCreateDates[index] : deleteAccountDates[index];
+//               return `Date: ${date.toLocaleDateString()} - Count: ${context.raw}`;
+//             }
+//           }
+//         }
+//       }
+//     }
+//   });
+// }
+
+// renderLineChart();
     

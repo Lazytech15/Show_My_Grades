@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="admin.css">
     <link rel="stylesheet" href="general.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>    
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 <body>
@@ -16,14 +17,16 @@
             <h3>Dashboard</h3>
             <ul>
                 <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Teacher</a></li>
+                <li><a href="#teacher-sectio">Teacher</a></li>
                 <li><a href="#">Student</a></li>
                 <li><a href="#">Change Password</a></li>
                 <li><a href="#">Add Student</a></li>
                 <li><a href="#">Delete Account</a></li>
             </ul>
+            <button id="logout-btn">Log-out</button>
         </article>
     </aside>
+    <main>
     <div class="pageloader-container" id="pageloader-container">
         <div class="fading-bars">
             <div class="bar"></div>
@@ -45,25 +48,30 @@
         </div>
     </div>
     <section class="chart-container" id="chart-container" style="display: none;">
-            <div class="donut-container">
-                <!-- <div class="labels-column">
-                <h2>Account Summary</h2>
-                <p>Admin Accounts: <span id="adminCount"></span></p>
-                <p>Student Accounts: <span id="studentCount"></span></p>
-                <p>Teacher Accounts: <span id="teacherCount"></span></p>
-                </div> -->
-                <div class="donut-column">
-                    <canvas id="myChart"></canvas>
-                </div>
+        <div class="database-data">
+            <div class="view-data">
+                <span id="adminCount"></span><p>Admin account</p>
             </div>
-            <div class="barchart-container">
-                <div class="bar-column">
-                    <canvas id="lineChart"></canvas>
-                </div>
+            <div class="view-data">
+                <span id="studentCount"></span><p>Student account</p>
             </div>
+            <div class="view-data">
+                <span id="teacherCount"></span><p>Teacher account </p>
+            </div>
+            <div class="view-data">
+                <span id="deleteAccount"></span><p>user Deleted </p>
+            </div>
+            <div class="view-data">
+                <span id="TdataAdded"></span><p style="font-size: 10px;">Total Data Added </p>
+            </div>
+            <div class="view-data">
+                <span id="loginCount"></span><p>Student Log-in </p>
+            </div>
+    </div>
+        </div>
             <div class="linegraph-container">
                 <div class="linegraph-column">
-                    <canvas id="linegraph"></canvas>
+                    <canvas id="line-graph" height="200"></canvas>
                     <div id="counts"></div>
                 </div>
             </div>
@@ -82,8 +90,24 @@
         </div>
         <div id="csv-table-container" class="table-container"></div>
     </section>
-    <section>
-        
+</main>
+    <section class="teacher-section" id="teacher-sectio">
+        <figure class="teacher-container">
+            <div class="teacher-content">
+                <label for="username">Full Name: </label>
+                <input type="text" name="username" id="teachername">
+                <label for="email">Email Address: </label>
+                <input type="text" name="email" id="email">
+                <label for="campus">ICCT CAMPUS: </label>
+                <input type="text" name="campus" id="campus">
+                <label for="password">Desire Password: </label>
+                <input type="password" name="password" id="password">
+                <div class="teacher-btn-container">
+                    <button id="teacher-save">Register</button>
+                    <button id="teacher-clear">Clear</button>
+                </div>
+            </div>
+        </figure>
     </section>
     
     <script src="https://firebase.google.com/docs/web/setup#available-libraries"></script>
@@ -92,3 +116,19 @@
     <script type="module" src="admin.js"></script>
 </body>
 </html>
+<!-- <div class="donut-container">
+     <div class="labels-column">
+    <h2>Account Summary</h2>
+    <p>Admin Accounts: <span id="adminCount"></span></p>
+    <p>Student Accounts: <span id="studentCount"></span></p>
+    <p>Teacher Accounts: <span id="teacherCount"></span></p>
+    </div>
+    <div class="donut-column">
+        <canvas id="myChart"></canvas>
+    </div>
+</div>
+<div class="barchart-container">
+    <div class="bar-column">
+        <canvas id="lineChart"></canvas>
+    </div>
+</div> -->
