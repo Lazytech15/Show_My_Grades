@@ -80,7 +80,7 @@ import { getFirestore, collection, query, where, getDocs, writeBatch,doc, getDoc
                   return counts;
                 }
                 
-                // document.getElementById('loader-container').style.display = 'block'; // Show loading indicator
+                document.getElementById('loader-container').style.display = 'block'; 
                 
                 getMonthlyDocumentCounts().then(counts => {
                   // Calculate the total data added
@@ -99,10 +99,10 @@ import { getFirestore, collection, query, where, getDocs, writeBatch,doc, getDoc
                   // Create the bar chart
                   createBarChart(counts);
                 
-                  document.getElementById('loader-container').style.display = 'none'; // Hide loading indicator
+                  document.getElementById('loader-container').style.display = 'none'; 
                 }).catch(error => {
                   console.error("Error fetching document counts: ", error);
-                  document.getElementById('loader-container').style.display = 'none'; // Hide loading indicator in case of error
+                  document.getElementById('loader-container').style.display = 'none'; 
                 });
                 getMonthlyDocumentCounts().then(counts => {
                 
