@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
-import { signOut,getAuth } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js";
+import { signOut,getAuth,EmailAuthProvider, reauthenticateWithCredential, deleteUser  } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js";
 import { getFirestore, collection, query, where, getDocs, writeBatch,doc, getDoc, deleteDoc, serverTimestamp,setDoc} from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -713,6 +713,259 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 });
 
 
+// Define header mapping globally
+const headerMapping = {
+  'TeacherName': 'TEACHER NAME',
+  'Email': 'EMAIL',
+  'Campus': 'CAMPUS',
+  'teacherpass': 'TEACHER PASSWORD'
+};
+
+// Function to get all teacher accounts
+async function getTeacherAccounts() {
+  const snapshot = await getDocs(collection(db, 'teacher-account'));
+  const teacherAccounts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  console.log('Teacher Accounts:', teacherAccounts); // Log the fetched data
+  return teacherAccounts;
+}
+
+// Function to display teacher accounts
+async function displayTeacherAccounts() {
+  document.getElementById('pageloader-container').style.display = 'flex';
+  try {
+    const teacherAccounts = await getTeacherAccounts();
+    createTeacherTable(teacherAccounts);
+  } catch (error) {
+    console.error("Error fetching teacher accounts:", error);
+  } finally {
+    document.getElementById('pageloader-container').style.display = 'none';
+  }
+}
+
+// Function to create the teacher table
+function createTeacherTable(data) {
+  const desiredOrder = ['TeacherName', 'Email', 'Campus', 'teacherpass'];
+
+  // Sort data alphabetically by the first letter of the second column
+  data.sort((a, b) => {
+    const secondColumnA = Object.values(a)[1]?.toString().charAt(0).toLowerCase() || '';
+    const secondColumnB = Object.values(b)[1]?.toString().charAt(0).toLowerCase() || '';
+    return secondColumnA.localeCompare(secondColumnB);
+  });
+
+  let tableHtml = '<table id="dynamic-teacher-table">'; // Assign an ID to the table
+  if (data.length > 0) {
+    // Create table headers according to desired order
+    tableHtml += '<thead><tr>';
+    desiredOrder.forEach(key => {
+      tableHtml += `<th style="text-wrap: nowrap; font-family:Open Sans, sans-serif;">${headerMapping[key]}</th>`;
+    });
+    tableHtml += '<th style="text-wrap: nowrap; font-family:Open Sans, sans-serif;">ACTIONS</th>'; // Add Actions header
+    tableHtml += '</tr></thead>';
+
+    // Create table rows according to desired order
+    tableHtml += '<tbody>';
+    data.forEach((row, index) => {
+      tableHtml += `<tr data-index="${index}">`;
+      desiredOrder.forEach(key => {
+        const cell = row[key] || ' ';
+        if (key === 'teacherpass') {
+          tableHtml += `<td style="padding: 5px; font-family:Roboto Slab, sans-serif;" data-column-name="${key}" data-label="${headerMapping[key]}" contenteditable="false">
+                          <span class="password-hidden">••••••••</span>
+                          <span class="password-visible" style="display:none;">${cell}</span>
+                          <button class="show-password-btn">Show</button>
+                        </td>`;
+        } else {
+          tableHtml += `<td style="padding: 5px; font-family:Roboto Slab, sans-serif;" data-column-name="${key}" data-label="${headerMapping[key]}" contenteditable="false">${cell}</td>`;
+        }
+      });
+      tableHtml += `<td style="padding: 5px; font-family:Roboto Slab, sans-serif;">
+                      <button class="edit-btn">Edit</button>
+                      <button class="delete-btn">Delete</button>
+                    </td>`;
+      tableHtml += '</tr>';
+    });
+    tableHtml += '</tbody>';
+  } else {
+    tableHtml += '<tbody><tr><td colspan="100%">No data available</td></tr></tbody>';
+  }
+  tableHtml += '</table>';
+  document.getElementById('teacher-table-container').innerHTML = tableHtml;
+
+  // Add event listeners to "Show Password" buttons
+  document.querySelectorAll('.show-password-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const passwordHidden = this.previousElementSibling.previousElementSibling;
+      const passwordVisible = this.previousElementSibling;
+      if (passwordVisible.style.display === 'none') {
+        passwordVisible.style.display = 'inline';
+        passwordHidden.style.display = 'none';
+        this.textContent = 'Hide';
+      } else {
+        passwordVisible.style.display = 'none';
+        passwordHidden.style.display = 'inline';
+        this.textContent = 'Show';
+      }
+    });
+  });
+
+  // Add event listeners to "Edit" buttons
+  document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const row = this.closest('tr');
+      row.querySelectorAll('td[data-column-name]').forEach(cell => {
+        cell.setAttribute('contenteditable', 'true');
+      });
+      this.textContent = 'Save';
+      this.classList.remove('edit-btn');
+      this.classList.add('save-btn');
+      addSaveListener(this);
+    });
+  });
+
+  // Add event listeners to "Delete" buttons
+  document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const row = this.closest('tr');
+      const email = row.querySelector('td[data-column-name="Email"]').textContent;
+      if (confirm('Are you sure you want to delete this row?')) {
+        deleteTeacherAccount(email);
+        row.remove();
+      }
+    });
+  });
+}
+
+// Function to append a new teacher to the table
+function appendTeacherToTable(teacherData) {
+  const table = document.getElementById('dynamic-teacher-table').getElementsByTagName('tbody')[0];
+  const newRow = table.insertRow();
+
+  const desiredOrder = ['TeacherName', 'Email', 'Campus', 'teacherpass'];
+  desiredOrder.forEach(key => {
+    const newCell = newRow.insertCell();
+    if (key === 'teacherpass') {
+      newCell.innerHTML = `<span class="password-hidden">••••••••</span>
+                           <span class="password-visible" style="display:none;">${teacherData[key]}</span>
+                           <button class="show-password-btn">Show</button>`;
+    } else {
+      newCell.textContent = teacherData[key] || ' ';
+    }
+    newCell.setAttribute('data-column-name', key);
+    newCell.setAttribute('data-label', headerMapping[key]);
+    newCell.setAttribute('contenteditable', 'false');
+  });
+
+  const actionCell = newRow.insertCell();
+  actionCell.innerHTML = `<button class="edit-btn">Edit</button>
+                          <button class="delete-btn">Delete</button>`;
+
+  // Add event listener to the new "Show Password" button
+  newRow.querySelector('.show-password-btn').addEventListener('click', function() {
+    const passwordHidden = this.previousElementSibling.previousElementSibling;
+    const passwordVisible = this.previousElementSibling;
+    if (passwordVisible.style.display === 'none') {
+      passwordVisible.style.display = 'inline';
+      passwordHidden.style.display = 'none';
+      this.textContent = 'Hide';
+    } else {
+      passwordVisible.style.display = 'none';
+      passwordHidden.style.display = 'inline';
+      this.textContent = 'Show';
+    }
+  });
+
+  // Add event listener to the new "Edit" button
+  newRow.querySelector('.edit-btn').addEventListener('click', function() {
+    const row = this.closest('tr');
+    row.querySelectorAll('td[data-column-name]').forEach(cell => {
+      cell.setAttribute('contenteditable', 'true');
+    });
+    this.textContent = 'Save';
+    this.classList.remove('edit-btn');
+    this.classList.add('save-btn');
+    addSaveListener(this);
+  });
+
+  // Add event listener to the new "Delete" button
+  newRow.querySelector('.delete-btn').addEventListener('click', function() {
+    const row = this.closest('tr');
+    const email = row.querySelector('td[data-column-name="Email"]').textContent;
+    if (confirm('Are you sure you want to delete this row?')) {
+      deleteTeacherAccount(email);
+      row.remove();
+    }
+  });
+}
+
+// Function to update teacher account in Firestore
+async function updateTeacherAccount(email, updatedData) {
+  try {
+    await setDoc(doc(db, "teacher-account", email), updatedData, { merge: true });
+    swal("SAVE!", "Teacher data updated successfully!", "success");
+  } catch (error) {
+    console.error("Error updating document in Firestore: ", error);
+    swal("Error!", "Failed to update teacher data. Please try again.", "error");
+  }
+}
+
+// Function to add save listener to save button
+function addSaveListener(button) {
+  button.addEventListener('click', function() {
+    const row = this.closest('tr');
+    const updatedData = {};
+    row.querySelectorAll('td[data-column-name]').forEach(cell => {
+      const columnName = cell.getAttribute('data-column-name');
+      updatedData[columnName] = cell.textContent;
+      cell.setAttribute('contenteditable', 'false');
+    });
+    updateTeacherAccount(updatedData.Email, updatedData);
+    this.textContent = 'Edit';
+    this.classList.remove('save-btn');
+    this.classList.add('edit-btn');
+  });
+}
+
+
+  // Function to re-authenticate the user
+  async function reauthenticateUser(user, password) {
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+  }
+
+  // Function to delete teacher account from Firestore and Firebase Authentication
+  async function deleteTeacherAccount(email) {
+    const user = auth.currentUser;
+
+    if (user) {
+      try {
+        // Prompt the user to enter their password
+        const password = prompt("Please enter your password to confirm account deletion:");
+
+        if (!password) {
+          throw new Error("Password is required for re-authentication.");
+        }
+
+        // Re-authenticate the user
+        await reauthenticateUser(user, password);
+
+        // Delete the user from Firebase Authentication
+        await deleteUser(user);
+
+        // Delete the user document from Firestore
+        await deleteDoc(doc(db, "teacher-account", email));
+
+        swal("DELETED!", "Teacher account deleted successfully!", "success");
+      } catch (error) {
+        console.error("Error deleting teacher account: ", error);
+        swal("Error!", "Failed to delete teacher account. Please try again.", "error");
+      }
+    } else {
+      console.error("No user is currently signed in.");
+    }
+  }
+
+// Function to create a new teacher account
 async function CreateTeacherAccount() {
   try {
     // Ensure variables are defined
@@ -728,7 +981,6 @@ async function CreateTeacherAccount() {
 
     console.log("Creating user with email:", email);
     // Store additional user information in Firestore
-
     await setDoc(doc(db, "teacher-account", email), {
       CREATEAT: serverTimestamp(),
       TeacherName: teacherName,
@@ -748,6 +1000,15 @@ async function CreateTeacherAccount() {
     campusElement.value = "";
     teacherpassElement.value = "";
 
+    // Update the table with the new teacher data
+    const newTeacherData = {
+      TeacherName: teacherName,
+      Email: email,
+      Campus: campus,
+      teacherpass: teacherpass
+    };
+    appendTeacherToTable(newTeacherData);
+
   } catch (error) {
     console.error("Error creating document in Firestore: ", error);
     swal("Error!", "Failed to register teacher. Please try again.", "error");
@@ -755,6 +1016,11 @@ async function CreateTeacherAccount() {
 }
 
 document.getElementById('teacher-save').addEventListener('click', CreateTeacherAccount);
+
+// Call the function to display teacher accounts
+displayTeacherAccounts();
+
+
 
 
 
