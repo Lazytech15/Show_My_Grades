@@ -1,6 +1,12 @@
 body{
-    margin: auto;
-    transition: all 0.5s;
+   margin: auto;
+   transition: all 0.5s;
+   background-image: url(assets/student-background.jpg);
+   background-position: center;
+   background-repeat: no-repeat;
+   background-size: cover;
+   height: 100vh;
+   overflow: hidden;
 }
 
 /* headers section */
@@ -10,6 +16,11 @@ body{
     padding: 0px 30px;
     margin: 20px;
     border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.164);
+   -webkit-backdrop-filter: blur(3px);
+   backdrop-filter: blur(3px);
+   border: 1px solid rgba(255,255,255,0.25);
 
  }
  .icon-container{
@@ -89,6 +100,7 @@ body{
     font-size: 0.7rem;
     font-family: "Roboto Slab", serif;
     padding: 5px 10px;
+    font-weight: 800;
  }
  th {
     background-color: var(--o-c);
@@ -97,6 +109,20 @@ body{
     font-weight: 800;
     color: var(--w-c);
  }
+
+ tr:nth-child(even) td {
+   background: rgba(255, 255, 255, 0.7);
+   -webkit-backdrop-filter: blur(10px);
+   backdrop-filter: blur(10px);
+   border: 1px solid rgba(255,255,255,0.25);
+}
+
+tr:nth-child(odd) td {
+   background: rgba(255, 255, 255, 0.5);
+   -webkit-backdrop-filter: blur(10px);
+   backdrop-filter: blur(10px);
+   border: 1px solid rgba(255,255,255,0.25);
+}
  #search-bar{
     padding: 5px;
     text-align: center;
@@ -197,6 +223,11 @@ body.dark-mode th{
    header{
       display: flex;
       justify-content: center;
+
+      background-color: rgba(255, 255, 255, 0.274);
+      -webkit-backdrop-filter: initial;
+      backdrop-filter: initial;
+      border: 1px solid initial;
    }
     .nav-bar-container{
        margin: initial;
@@ -205,7 +236,7 @@ body.dark-mode th{
        left: 50%;
        transform: translate(-50%);
        width: 90%;
-       background-color: var(--o-c);
+       background-color: rgba(255, 255, 255, 0.274);
        border-radius: 10px;
        padding: 5px;
        color: var(--w-c);
@@ -215,8 +246,11 @@ body.dark-mode th{
       justify-content: space-evenly;
       gap: 70%;
     }
+    .icon-container img{
+      width: 35px;
+   }
     .nav-bar-container a{
-       font-size:var(--ts-ss) ;
+      font-size: 1.2rem;
        color: var(--w-c);
     }
     section{
@@ -258,7 +292,7 @@ body.dark-mode th{
         border-bottom: 1px solid #eee;
         padding: 15px;
         color: var(--b-c);
-        font-size: 9px;
+        font-size: 0.6rem;
     }
     
     td::before {
@@ -272,6 +306,19 @@ body.dark-mode th{
         box-sizing: border-box;
         white-space: nowrap;
     }
+    tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.301);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.25);
+      }
+   
+      tr:nth-child(odd) td {
+         background: rgba(255, 255, 255, 0.301);
+         -webkit-backdrop-filter: blur(10px);
+         backdrop-filter: blur(10px);
+         border: 1px solid rgba(255,255,255,0.25);
+      }
     #search-bar{
       position: fixed;
       bottom: 16px;

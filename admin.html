@@ -12,22 +12,16 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 <body>
-    <aside class="dashboard" id="dashboard" style="display: none;">
-        <article class="sidebar">
+    <header>
+        <nav class="navbar">
             <h3>Dashboard</h3>
             <ul>
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#teacher-sectio">Teacher</a></li>
-                <li><a href="#">Student</a></li>
-                <li><a href="#">Change Password</a></li>
-                <li><a href="#">Add Student</a></li>
-                <li><a href="#">Delete Account</a></li>
+                <button id="logout-btn">Log-out</button>
             </ul>
-            <button id="logout-btn">Log-out</button>
-        </article>
-    </aside>
+        </nav>
+    </header>
     <main>
-    <div class="pageloader-container" id="pageloader-container">
+    <div class="pageloader-container" id="pageloader-container" style="display: none;">
         <div class="fading-bars">
             <div class="bar"></div>
             <div class="bar"></div>
@@ -47,7 +41,7 @@
             <div class="card">g</div>
         </div>
     </div>
-    <section class="chart-container" id="chart-container" style="display: none;">
+    <section class="chart-container" id="chart-container">
         <div class="database-data">
             <div class="view-data">
                 <span id="adminCount"></span><p>Admin account</p>
@@ -76,7 +70,7 @@
                 </div>
             </div>
     </section>
-    <section class="table-section" id="table-section" style="display: none;">
+    <section class="table-section" id="table-section" >
         <div class="action-buttons">
             <input type="text" id="search-bar" placeholder="STUDENT ID">
             <button class="a-buttons" id="edit-button">Edit</button>

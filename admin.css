@@ -8,55 +8,25 @@ body {
     transition: all 0.5s;
     background-color: #ddd;
 }
-
-.dashboard {
+.navbar{
+    margin:10px;
     display: flex;
-    height: 100vh;
+    justify-content: space-between;
 }
-
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: #333;
-    color: #fff;
-    width: 200px;
-    height: 100%;
-    padding: 20px;
+.navbar ul{
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    gap: 20px;
     align-items: center;
-}
-
-.sidebar h3 {
-    width: 100%;
-    margin-top: 0;
-    text-align: left;
-}
-
-.sidebar ul {
     list-style: none;
-    padding: 0;
 }
-
-.sidebar li {
-    margin-bottom: 10px;
-}
-
-.sidebar a {
-    color: #fff;
+.navbar a{
     text-decoration: none;
-    display: block;
-    padding: 10px;
-    border-left: 4px solid transparent;
-}
-
-.sidebar a:hover {
-    background-color: #555;
-    border-left-color: #ccc;
+    color: var(--b-c);
+    font-weight: 900;
+    font-family: "Roboto Slab", serif;
 }
 #logout-btn{
-    position: fixed;
     bottom: 10px;
     border-style: none;
     border-radius: 5px;
@@ -100,16 +70,13 @@ body {
 }
 
 .chart-container {
-    position: absolute;
-    top: 10px;
     display: flex;
     justify-content: left;
     gap:20px;
-    margin-top: 10px;
     z-index: 1; 
     height: 35%;
     margin: auto;
-    margin-left: 220px;
+    margin-bottom: 20px;
 }
 .linegraph-container{
     width: 40%;
@@ -154,14 +121,10 @@ body {
     width: 25px;
     background-color: transparent;
 }
-.table-section {
-    margin-left: 220px;
-    position: absolute;
-    top: 40%;
-    width: 80%;
-    
+.table-section{
+    width: 95%;
+    margin: auto;
 }
-
 .table-container {
     max-height: 400px;
     overflow-y: auto; 
@@ -202,11 +165,10 @@ th {
 }
 
 .teacher-section{
-    height: 100vh;
+    margin-top: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 300px;
 }
 .teacher-container{
     padding: 20px;
@@ -360,14 +322,14 @@ th {
  }
  
  .pageloader-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 80vh;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
  }
  
  .fading-bars {

@@ -1,24 +1,27 @@
-/* body{
-  background-image: url(/assets/login-background.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  -webkit-backdrop-filter: blur();
-  height: 100vh;  
-} */
 body{
-    margin: auto;
-    transition: all 0.5s;
+   transition: all 0.5s;
+   background-image: url(assets/main-background.jpeg);
+   background-position: center;
+   background-repeat: no-repeat;
+   background-size: cover;
+   height: 100vh;
+   overflow: hidden;
 }
 
 /* headers section */
  header{
-    display: flex;
-    justify-content: space-between;
-    padding: 0px 30px;
-    margin: 20px;
-    border-radius: 20px;
+   display: flex;
+   justify-content: space-between;
+   padding: 0px 30px;
+   border-radius: 5px;
+   width: 95%;
+   margin: auto;
+   margin-top: 10px;
 
+   background: rgba(255, 255, 255, 0.164);
+   -webkit-backdrop-filter: blur(3px);
+   backdrop-filter: blur(3px);
+   border: 1px solid rgba(255,255,255,0.25);
  }
  .icon-container{
     display: flex;
@@ -68,22 +71,31 @@ body{
  /* drag and drop */
  #drop-zone {
    position: absolute;
-   top:50%;
+   top:55%;
    left: 50%;
    transform: translate(-50%,-50%);
-   width: 80%;
-   height: 50%;
+   width: 95%;
+   height: 80%;
    font-family: "Roboto Slab", serif;
-   border: 2px dashed var(--o-c);
    border-radius: 4px;
    display: flex;
+   flex-direction: column;
    justify-content: center;
    align-items: center;
    text-align: center;
    color: var(--o-c);
-   
+
+   background: rgba(255, 255, 255, 0.144);
+   -webkit-backdrop-filter: blur(5px);
+   backdrop-filter: blur(5px);
+   border: 1px solid rgba(255,255,255,0.25);
+
    cursor: pointer;
    transition: background-color 0.2s ease;
+}
+#drop-zone img{
+   width: 150px;
+   height: 150px;
 }
 
 #drop-zone.dragover {
@@ -93,17 +105,15 @@ body{
    margin: 20px;
 }
 .table-container {
-   width: 95%;
+   width: 98%;
    max-height: 500px;
    overflow-x: auto;
    margin: auto;
 }
 
-
 table {
    width: 100%;
    border-collapse: collapse;
-   
 }
 
 th, td {
@@ -111,19 +121,37 @@ th, td {
    padding: 8px;
    text-align: left;
    text-align: center;
-   
 }
-td{
+
+td {
    font-size: 0.7rem;
    font-family: "Roboto Slab", serif;
    padding: 0px 10px;
+   color:var(--b-c);
+   font-weight: 800;
 }
+
 th {
    background-color: #f2f2f2;
    font-size: var(--ts-ss);
    font-family: "Open Sans", sans-serif;
    font-weight: 800;
 }
+
+tr:nth-child(even) td {
+   background: rgba(255, 255, 255, 0.7);
+   -webkit-backdrop-filter: blur(10px);
+   backdrop-filter: blur(10px);
+   border: 1px solid rgba(255,255,255,0.25);
+}
+
+tr:nth-child(odd) td {
+   background: rgba(255, 255, 255, 0.5);
+   -webkit-backdrop-filter: blur(10px);
+   backdrop-filter: blur(10px);
+   border: 1px solid rgba(255,255,255,0.25);
+}
+
 
 .upload-button{
    position: absolute;
@@ -319,15 +347,26 @@ body.dark-mode .table-button{
    header{
       display: flex;
       justify-content: center;
+      width: 95%;
+      background-color: rgba(255, 255, 255, 0.274);
+      -webkit-backdrop-filter: initial;
+      backdrop-filter: initial;
+      border: 1px solid initial;
+   }
+   .icon-container img{
+      width: 35px;
+   }
+   .icon-container a{
+      font-size: 1.2rem;
    }
    .nav-bar-container{
       margin: initial;
-      position: fixed;
+      position: absolute;
       bottom:10px;
       left: 50%;
       transform: translate(-50%);
       width: 90%;
-      background-color: var(--o-c);
+      background-color: rgba(255, 255, 255, 0.274);
       border-radius: 10px;
       padding: 5px;
       color: var(--w-c);
@@ -345,6 +384,10 @@ body.dark-mode .table-button{
       width: 100%;
       overflow-x: auto;
       max-height: 650px;
+   }
+   #drop-zone{
+      top: 50%;
+      height: 80%;
    }
    table {
       width: 100%;
@@ -390,6 +433,19 @@ body.dark-mode .table-button{
       box-sizing: border-box;
       white-space: nowrap; 
   }
+  tr:nth-child(even) td {
+   background: rgba(255, 255, 255, 0.301);
+   -webkit-backdrop-filter: blur(10px);
+   backdrop-filter: blur(10px);
+   border: 1px solid rgba(255,255,255,0.25);
+   }
+
+   tr:nth-child(odd) td {
+      background: rgba(255, 255, 255, 0.301);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.25);
+   }
    .table-buttons{
       display: flex;
       flex-direction: row;

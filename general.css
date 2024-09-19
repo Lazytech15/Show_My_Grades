@@ -15,6 +15,24 @@
     margin: 0;
     box-sizing: border-box;
 }
+/* body{
+    background: rgb(160,19,255);
+    background: linear-gradient(45deg,#0000 calc(25%/3), #ffffff 0 calc(50%/3),
+    #0000 0 calc(250%/3), #ffffff 0 calc(275%/3),
+    #0000 0),linear-gradient( 45deg,#ffffff calc(25%/3), #0000 0 calc(50%/3),
+    #ffffff 0 25%, #0000 0 75%,
+    #ffffff 0 calc(250%/3), #0000 0 calc(275%/3),
+    #ffffff 0),
+    linear-gradient(-45deg,#0000 calc(25%/3), #ffffff 0 calc(50%/3),
+    #0000 0 calc(250%/3), #ffffff 0 calc(275%/3),
+    #0000 0),linear-gradient(-45deg,#ffffff calc(25%/3), #0000 0 calc(50%/3),
+    #ffffff 0 25%, #0000 0 75%,
+    #ffffff 0 calc(250%/3), #0000 0 calc(275%/3),
+    #ffffff 0)
+    #b0b0b0;
+    background-size: 56px 56px;
+    background-position: 0 0, 28px  28px;
+} */
 :root{
     /* light mode color */
     --o-c:#ff4800;
