@@ -116,17 +116,23 @@ form button{
 form button:hover{
     background-color: var(--lbh-c);
 }
-#google-signin-button{
+.sign-in-icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+#google-signin-button, #faceRecognition-signin-button{
     background-color: transparent;
     border-style: none;
     margin-top: 20px;
     cursor: pointer;
     transition: all 0.5s;
 }
-#google-signin-button:hover{
+#google-signin-button:hover, #faceRecognition-signin-button:hover{
    filter:drop-shadow(0px 0px 3px #000)
 }
-#google-signin-button img{
+#google-signin-button img, #faceRecognition-signin-button img{
     width: 30px;
     height: 30px; 
 }
@@ -136,6 +142,45 @@ form button:hover{
     font-size: var(--ts-ss);
     text-align: center;
 }
+
+.faceRecognition-container {
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.faceRecognition-content {
+    border: 1px solid rgb(255, 255, 255);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    border-radius: 5px;
+    background-color: #fff; 
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.faceRecognition-content button {
+    width: 50%;
+    margin: auto;
+    padding: 5px;
+    border-style: none;
+    background-color: var(--o-c);
+    border-radius: 5px;
+    font-family: "Roboto Slab", serif;
+    font-weight: 800;
+    color: var(--w-c);
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
 
 #loading-indicator {
     position: absolute;
@@ -240,7 +285,8 @@ form button:hover{
 }
 
 body.dark-mode{
-    background: var(--db-c);
+    background-image: initial;
+    background: var(--b-c);
     color: var(--w-c);
 }
 body.dark-mode .login-container {
@@ -256,8 +302,24 @@ body.dark-mode form button:hover{
 
 @media screen and (max-width:700px) {
     .login-container {
-        width: 75%;
+        width: 60%;
         font-size: var(--ts-ss);
+        padding: 20px;
+    }
+    .input-group{
+        width: 100%;
+    }
+    .input-group input {
+       width: 100%;
+    }
+    form{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    #googlep {
+        margin-top: 10px;
     }
     
 }

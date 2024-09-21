@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="icon" href="assets/eye1.png" type="image/x-icon">
-
+    <script defer src="FaceRecognition/face-api.min.js"></script>
+    <script type="module" defer src="FaceRecognition/script.js"></script>
     <link rel="stylesheet" href="login.css">
     <link rel="stylesheet" href="general.css">
 </head>
@@ -40,10 +41,19 @@
             <button type="submit">Login</button>
             
         </form>
-        <button id="google-signin-button"><img src="assets/google-icon.png" alt=""></button>
+        <div class="sign-in-icon">
+            <button id="google-signin-button"><img src="assets/google-icon.png" alt=""></button>
+            <button id="faceRecognition-signin-button"><img src="assets/face-recognition.png" alt=""></button>
+        </div>
         <p id="googlep">Sign-in with Google</p>
         <div id="loading-indicator" style="display: none;">
             <div class="ripple"></div>
+        </div>
+        <div class="faceRecognition-container" id="faceRecognition-container"  style="display: none;">
+            <div class="faceRecognition-content">
+                <video id="video" width="300" height="250" autoplay></video>
+                <button id="cancel-facerecognition">Cancel</button>
+            </div>
         </div>
     </figure>
 </main>

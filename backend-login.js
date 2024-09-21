@@ -101,3 +101,8 @@ authStateChangedHandler = onAuthStateChanged(auth, (user) => {
     window.location.href = 'index.html';
   }
 });
+const faceRecognitionButton = document.getElementById('faceRecognition-signin-button');
+faceRecognitionButton.addEventListener('click',()=>{
+  document.getElementById('faceRecognition-container').style.display="flex";
+})
+ 

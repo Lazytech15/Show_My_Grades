@@ -206,6 +206,7 @@ tr:nth-child(odd) td {
   /* dark-mode */
 
 body.dark-mode{
+   background-image: initial;
     background-color: var(--b-c);
     color: var(--w-c);
     transition: all 0.5s;
@@ -223,6 +224,7 @@ body.dark-mode th{
    header{
       display: flex;
       justify-content: center;
+      border-radius: 5px;
 
       background-color: rgba(255, 255, 255, 0.274);
       -webkit-backdrop-filter: initial;
