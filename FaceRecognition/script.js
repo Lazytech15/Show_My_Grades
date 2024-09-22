@@ -21,12 +21,14 @@ const video = document.getElementById("video");
 let faceMatcher;
 let canvas;
 let isProcessing = false;
+let lastProcessingTime = 0;
+const processingInterval = 500; // Process every 500ms
 
 Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri("FaceRecognition/models"),
-  faceapi.nets.faceRecognitionNet.loadFromUri("FaceRecognition/models"),
-  faceapi.nets.faceLandmark68Net.loadFromUri("FaceRecognition/models"),
-]);
+  faceapi.nets.tinyFaceDetector.loadFromUri("/FaceRecognition/models"),
+  faceapi.nets.faceRecognitionNet.loadFromUri("/FaceRecognition/models"),
+  faceapi.nets.faceLandmark68Net.loadFromUri("/FaceRecognition/models"),
+]).then(startFaceRecognition);
 
 document.getElementById("faceRecognition-signin-button").addEventListener("click", startFaceRecognition);
 
@@ -35,42 +37,37 @@ function startFaceRecognition() {
   document.getElementById('faceRecognition-container').style.display="flex";
 }
 
-let webcamStream;
-
 function startWebcam() {
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            webcamStream = stream;
-            document.querySelector('video').srcObject = stream;
-            console.log("Webcam started");
-        })
-        .catch(error => {
-            console.error("Error accessing webcam: ", error);
-        });
+  navigator.mediaDevices
+    .getUserMedia({ video: { width: 640, height: 480 } })
+    .then((stream) => {
+      video.srcObject = stream;
+      video.onloadedmetadata = () => {
+        initializeFaceRecognition();
+      };
+    })
+    .catch(console.error);
 }
 
 function stopWebcam() {
-    if (webcamStream) {
-        webcamStream.getTracks().forEach(track => track.stop());
-        webcamStream = null;
-        document.getElementById('faceRecognition-container').style.display = "none";
-        console.log("Webcam stopped");
-    } else {
-        console.log("No webcam stream to stop");
-    }
+  if (video.srcObject) {
+    const tracks = video.srcObject.getTracks();
+    tracks.forEach(track => track.stop());
+    video.srcObject = null;
+    document.getElementById('faceRecognition-container').style.display = "none";
+    console.log("Webcam stopped");
+  } else {
+    console.log("No webcam stream to stop");
+  }
 }
 
 function cancelFaceRecognition() {
-    stopWebcam();
-    // Add any additional cleanup or state reset logic here
-    console.log("Face recognition cancelled");
+  stopWebcam();
+  console.log("Face recognition cancelled");
 }
 
-// Example usage
 document.getElementById('faceRecognition-signin-button').addEventListener('click', startWebcam);
 document.getElementById('cancel-facerecognition').addEventListener('click', cancelFaceRecognition);
-
-
 
 async function getImageUrl(label, i) {
   const storageRef = ref(storage, `/label/${label}/${i}.png`);
@@ -78,6 +75,7 @@ async function getImageUrl(label, i) {
 }
 
 async function fetchImage(url) {
+  console.log(`Fetching image from URL: ${url}`);
   const response = await fetch(url);
   const blob = await response.blob();
   return await faceapi.bufferToImage(blob);
@@ -95,7 +93,9 @@ async function getLabeledFaceDescriptions() {
           .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
           .withFaceLandmarks()
           .withFaceDescriptor();
-        descriptions.push(detections.descriptor);
+        if (detections) {
+          descriptions.push(detections.descriptor);
+        }
       }
       return new faceapi.LabeledFaceDescriptors(label, descriptions);
     })
@@ -104,7 +104,7 @@ async function getLabeledFaceDescriptions() {
 
 async function initializeFaceRecognition() {
   const labeledFaceDescriptors = await getLabeledFaceDescriptions();
-  faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
+  faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
 
   canvas = faceapi.createCanvasFromMedia(video);
   document.body.append(canvas);
@@ -115,11 +115,13 @@ async function initializeFaceRecognition() {
   requestAnimationFrame(processFrame);
 }
 
-async function processFrame() {
-  if (!isProcessing) {
+async function processFrame(timestamp) {
+  if (!isProcessing && timestamp - lastProcessingTime > processingInterval) {
     isProcessing = true;
+    lastProcessingTime = timestamp;
+
     const detections = await faceapi
-      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
       .withFaceLandmarks()
       .withFaceDescriptors();
 
