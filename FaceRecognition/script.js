@@ -25,9 +25,9 @@ let lastProcessingTime = 0;
 const processingInterval = 500; // Process every 500ms
 
 Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri("/FaceRecognition/models"),
-  faceapi.nets.faceRecognitionNet.loadFromUri("/FaceRecognition/models"),
-  faceapi.nets.faceLandmark68Net.loadFromUri("/FaceRecognition/models"),
+  faceapi.nets.tinyFaceDetector.loadFromUri("FaceRecognition/models"),
+  faceapi.nets.faceRecognitionNet.loadFromUri("FaceRecognition/models"),
+  faceapi.nets.faceLandmark68Net.loadFromUri("FaceRecognition/models"),
 ]).then(startFaceRecognition);
 
 document.getElementById("faceRecognition-signin-button").addEventListener("click", startFaceRecognition);
