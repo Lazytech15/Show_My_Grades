@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
 import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-storage.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js";
+import { getFirestore, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -16,48 +17,78 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 const video = document.getElementById("video");
 let faceMatcher;
-let canvas;
 let isProcessing = false;
 let lastProcessingTime = 0;
-const processingInterval = 500; // Process every 500ms
+const processingInterval = 100;
 
-Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri("FaceRecognition/models"),
-  faceapi.nets.faceRecognitionNet.loadFromUri("FaceRecognition/models"),
-  faceapi.nets.faceLandmark68Net.loadFromUri("FaceRecognition/models"),
-]).then(startFaceRecognition);
+// Add loading indicator
+const loadingIndicators = document.createElement('div');
+loadingIndicators.id = 'loading-indicators';
+loadingIndicators.textContent = '.';
+loadingIndicators.style.display = 'none';
+document.body.appendChild(loadingIndicators);
 
-document.getElementById("faceRecognition-signin-button").addEventListener("click", startFaceRecognition);
-
-function startFaceRecognition() {
-  startWebcam();
-  document.getElementById('faceRecognition-container').style.display="flex";
+// Function to show/hide loading indicator
+function toggleLoadingIndicator(show) {
+  loadingIndicators.style.display = show ? 'block' : 'none';
 }
+
+// Load models and fetch data before starting face recognition
+async function initializeResources() {
+  toggleLoadingIndicator(true);
+  alert('Please wait while we getting some goods stuff');
+  try {
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri("/FaceRecognition/models"),
+      faceapi.nets.faceRecognitionNet.loadFromUri("/FaceRecognition/models"),
+      faceapi.nets.faceLandmark68Net.loadFromUri("/FaceRecognition/models"),
+    ]);
+    console.log("Models loaded");
+
+    faceMatcher = new faceapi.FaceMatcher(await getLabeledFaceDescriptions(), 0.6);
+    console.log("Face data fetched and processed");
+  } catch (error) {
+    console.error("Error initializing resources:", error);
+  } finally {
+    toggleLoadingIndicator(false);
+  }
+}
+
+// Modified startFaceRecognition function
+async function startFaceRecognition() {
+  try {
+    await initializeResources();
+    startWebcam();
+    document.getElementById('faceRecognition-container').style.display = "flex";
+  } catch (error) {
+    console.error("Failed to start face recognition:", error);
+    alert("Failed to start face recognition. Please try again.");
+  }
+}
+
+// Attach event listener to the button
+document.getElementById("faceRecognition-signin-button").addEventListener("click", startFaceRecognition);
 
 function startWebcam() {
   navigator.mediaDevices
     .getUserMedia({ video: { width: 640, height: 480 } })
     .then((stream) => {
       video.srcObject = stream;
-      video.onloadedmetadata = () => {
-        initializeFaceRecognition();
-      };
+      video.onloadedmetadata = () => requestAnimationFrame(processFrame);
     })
     .catch(console.error);
 }
 
 function stopWebcam() {
   if (video.srcObject) {
-    const tracks = video.srcObject.getTracks();
-    tracks.forEach(track => track.stop());
+    video.srcObject.getTracks().forEach(track => track.stop());
     video.srcObject = null;
     document.getElementById('faceRecognition-container').style.display = "none";
     console.log("Webcam stopped");
-  } else {
-    console.log("No webcam stream to stop");
   }
 }
 
@@ -66,55 +97,52 @@ function cancelFaceRecognition() {
   console.log("Face recognition cancelled");
 }
 
-document.getElementById('faceRecognition-signin-button').addEventListener('click', startWebcam);
 document.getElementById('cancel-facerecognition').addEventListener('click', cancelFaceRecognition);
 
 async function getImageUrl(label, i) {
-  const storageRef = ref(storage, `/label/${label}/${i}.png`);
-  return await getDownloadURL(storageRef);
+  getTeacherAccounts();
+  return await getDownloadURL(ref(storage, `/teacherIMG/${label}/${i}.png`));
 }
 
 async function fetchImage(url) {
-  console.log(`Fetching image from URL: ${url}`);
   const response = await fetch(url);
-  const blob = await response.blob();
-  return await faceapi.bufferToImage(blob);
+  return await faceapi.bufferToImage(await response.blob());
+}
+
+async function getTeacherAccounts() {
+  const snapshot = await getDocs(collection(db, 'teacher-account'));
+  const teacherAccounts = snapshot.docs.map(doc => doc.id).sort();
+  return teacherAccounts;
+}
+
+async function getTeacherData(accountId) {
+  const colRef = collection(db, accountId);
+  const snapshot = await getDocs(colRef);
+  const documentsArray = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return documentsArray;
 }
 
 async function getLabeledFaceDescriptions() {
-  const labels = ["Emmanuel"];
+  // Extract email addresses (document IDs) from teacher accounts
+  const teacherAccounts = await getTeacherAccounts();
+  
   return Promise.all(
-    labels.map(async (label) => {
+    teacherAccounts.map(async (accountId) => {
       const descriptions = [];
       for (let i = 1; i <= 2; i++) {
-        const url = await getImageUrl(label, i);
-        const img = await fetchImage(url);
-        const detections = await faceapi
-          .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+        const img = await fetchImage(await getImageUrl(accountId, i));
+        const detection = await faceapi
+          .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
           .withFaceLandmarks()
           .withFaceDescriptor();
-        if (detections) {
-          descriptions.push(detections.descriptor);
-        }
+        if (detection) descriptions.push(detection.descriptor);
       }
-      return new faceapi.LabeledFaceDescriptors(label, descriptions);
+      return new faceapi.LabeledFaceDescriptors(accountId, descriptions);
     })
   );
 }
 
-async function initializeFaceRecognition() {
-  const labeledFaceDescriptors = await getLabeledFaceDescriptions();
-  faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
-
-  canvas = faceapi.createCanvasFromMedia(video);
-  document.body.append(canvas);
-
-  const displaySize = { width: video.width, height: video.height };
-  faceapi.matchDimensions(canvas, displaySize);
-
-  requestAnimationFrame(processFrame);
-}
-
+let userEmail;
 async function processFrame(timestamp) {
   if (!isProcessing && timestamp - lastProcessingTime > processingInterval) {
     isProcessing = true;
@@ -125,19 +153,31 @@ async function processFrame(timestamp) {
       .withFaceLandmarks()
       .withFaceDescriptors();
 
-    const displaySize = { width: video.width, height: video.height };
-    const resizedDetections = faceapi.resizeResults(detections, displaySize);
-
-    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-
-    const results = resizedDetections.map((d) => faceMatcher.findBestMatch(d.descriptor));
-    results.forEach((result, i) => {
-      const box = resizedDetections[i].detection.box;
-      const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() });
-      drawBox.draw(canvas);
-    });
+    for (const detection of detections) {
+      const result = faceMatcher.findBestMatch(detection.descriptor);
+      console.log(`Face match found: ${result.label}`);
+      userEmail = result.label;
+      AutoLogin();
+      console.log(`Path: /teacherIMG/${result.label}`);
+    }
 
     isProcessing = false;
   }
   requestAnimationFrame(processFrame);
 }
+
+async function AutoLogin(){
+  const email = document.getElementById('username');
+  const password = document.getElementById('password');
+
+  email.value = userEmail;
+  console.log(userEmail);
+  password.value ="1122334455";
+  document.getElementById('faceRecognition-container').style.display="none";
+  
+}
+
+// Remove the initialization on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("DOM loaded, waiting for user to start face recognition");
+});

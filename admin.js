@@ -131,8 +131,6 @@ import { getFirestore, collection, query, where, getDocs, writeBatch,doc, getDoc
                   ];
                 
                   const canvas = document.getElementById('line-graph');
-                  canvas.width = 400;
-                  canvas.height = 200;
                   const ctx = canvas.getContext('2d');
                 
                   new Chart(ctx, {

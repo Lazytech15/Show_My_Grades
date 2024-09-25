@@ -181,6 +181,14 @@ form button:hover{
     cursor: pointer;
 }
 
+#loading-indicators{
+    color: red;
+    font-size: 100px;
+    position: absolute;
+    top: -60px;
+    right: 10px;
+}
+
 
 #loading-indicator {
     position: absolute;

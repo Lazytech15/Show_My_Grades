@@ -3,10 +3,24 @@ html{
 }
 body {
     font-family: "Roboto Slab", serif; 
-    margin: 0;
-    padding: 0;
     transition: all 0.5s;
     background-color: #ddd;
+    background-image: url(assets/admin-background.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+}
+header{
+    width: 95%;
+    margin: auto;
+    margin-top: 10px;
+    border-radius: 5px;
+    color: var(--w-c);
+    background: rgba(255, 255, 255, 0.164);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    border: 1px solid rgba(255,255,255,0.25);
 }
 .navbar{
     margin:10px;
@@ -83,7 +97,17 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 0px 10px var(--b-c);
+    margin-top: 10px;
+
+    background: rgba(255, 255, 255, 0.164);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    border: 1px solid rgba(255,255,255,0.25);
 }
+#line-graph{
+    width: 500px;
+}
+
 #search-bar{
     outline: transparent;
     padding: 10px;
@@ -150,19 +174,46 @@ td {
     font-family: "Roboto Slab", serif;
     padding: 0px 10px;
     background-color: var(--dt-c);
-    color: var(--w-c);
+    font-size: 0.7rem;
+    padding: 0px 10px;
+    color:var(--b-c);
+    font-weight: 800;
 }
 
 th {
     background-color: var(--o-c);
     font-size: var(--ts-ss);
-    color: var(--w-c);
+    color: var(--b-c);
     font-family: "Open Sans", sans-serif;
     font-weight: 800;
     position: sticky; 
     top: -1px; 
     z-index: 1; 
 }
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    text-align: center;
+    background-color: #f2f2f2;
+    font-size: var(--ts-ss);
+    font-family: "Open Sans", sans-serif;
+    font-weight: 800;
+ }
+ 
+ tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.7);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25);
+ }
+ 
+ tr:nth-child(odd) td {
+    background: rgba(255, 255, 255, 0.5);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25);
+ }
 
 .teacher-section{
     margin-top: 20px;
@@ -174,11 +225,15 @@ th {
     padding: 20px;
     width: 1000px;
     height: 400px;
-    background-color: rgb(255, 242, 242);
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 5px;
+
+    background: rgba(255, 255, 255, 0.164);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    border: 1px solid rgba(255,255,255,0.25);
 }
 
 .teacher-content{
@@ -192,6 +247,12 @@ th {
     flex-direction: column;
     align-items: center;
     width: 180px;
+    color: var(--w-c);
+}
+
+.teacheRegistrationForm h4{
+    text-transform: uppercase;
+    font-family: "Roboto Slab", serif;
     
 }
 .teacheRegistrationForm label{
@@ -373,6 +434,120 @@ th {
         opacity: 1;
     }
  }
+ @media screen and (max-width: 700px) {
+    .chart-container {
+        flex-direction: column;
+        width: 100%;
+        max-width: 500px;
+        margin: auto;
+    }
+    .linegraph-container,
+    .database-data {
+        width: 90%;
+        margin: auto;
+        margin-bottom: 20px;
+    }
+    #line-graph{
+        width: 340px;
+        height: 200px;
+        color: var(--w-c);
+    }
+    .database-data{
+        margin-top: 10px;
+    }
+    table {
+        width: 100%;
+        margin: auto;
+     }
+     thead {
+        display: none;
+     }
+     tr {
+        display: block;
+        margin-bottom: 10px;
+     }
+     td:first-child {
+        background-color: orange;
+        font-weight: 900;
+        color: var(--w-c);
+     }
+     td:last-child {
+        padding-left: 150px;
+     }
+     td {
+        display: block; 
+        position: relative; 
+        padding-left: 50%; 
+        box-sizing: border-box; 
+        word-wrap: break-word;
+        overflow: hidden; 
+        line-height: 1em; 
+        color: var(--b-c); 
+        font-size: 9px; 
+        text-align: right;
+        padding: 10px;
+     }
+     
+    td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%; 
+        padding-left: 10px;
+        font-weight: bold;
+        text-align: left;
+        box-sizing: border-box;
+        white-space: nowrap; 
+    }
+    tr:nth-child(even) td {
+     background: rgba(255, 255, 255, 0.301);
+     -webkit-backdrop-filter: blur(10px);
+     backdrop-filter: blur(10px);
+     border: 1px solid rgba(255,255,255,0.25);
+     }
+  
+     tr:nth-child(odd) td {
+        background: rgba(255, 255, 255, 0.301);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.25);
+     }
+     .teacher-container{
+        width: 95%;
+        height: 500px;
+        margin-bottom: 2px;
+     }
+     .teacher-content{
+        width: 100%;
+        flex-direction: column;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+     }
+
+     .teacheRegistrationForm{
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+     }
+     .teacheRegistrationForm label{
+        display: none;
+     }
+     .teacheRegistrationForm input{
+        border: 1px;
+        margin-bottom: 10px;
+        width: 100%;
+        text-align: center;
+        background-color: #ffffff;
+        border-radius: 5px;
+     }
+     .teacheRegistrationForm input::before{
+        content: "";
+     }
+     #dynamic-teacher-table{
+        width: 350px;
+     }
+}
 
  /* .donut-container {
     display: flex;
