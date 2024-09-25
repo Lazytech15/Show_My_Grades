@@ -43,9 +43,9 @@ async function initializeResources() {
   alert('Please wait while we getting some goods stuff');
   try {
     await Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri("/FaceRecognition/models"),
-      faceapi.nets.faceRecognitionNet.loadFromUri("/FaceRecognition/models"),
-      faceapi.nets.faceLandmark68Net.loadFromUri("/FaceRecognition/models"),
+      faceapi.nets.tinyFaceDetector.loadFromUri("FaceRecognition/models"),
+      faceapi.nets.faceRecognitionNet.loadFromUri("FaceRecognition/models"),
+      faceapi.nets.faceLandmark68Net.loadFromUri("FaceRecognition/models"),
     ]);
     console.log("Models loaded");
 
