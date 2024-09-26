@@ -20,14 +20,16 @@ const storage = getStorage(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-
-
 const video = document.getElementById("video");
 let faceMatcher;
 let isProcessing = false;
 let lastProcessingTime = 0;
 const processingInterval = 100;
 
+// Anti-spoofing variables
+let lastEyeState = null;
+let blinkDetected = false;
+let antiSpoofingPassed = false;
 
 // Create the loading indicator with spinner
 const loadingIndicator = document.createElement('div');
@@ -51,8 +53,30 @@ loadingIndicator.innerHTML = `
 `;
 document.body.appendChild(loadingIndicator);
 
+// Create feedback message element
+const feedbackMessage = document.createElement('div');
+feedbackMessage.id = 'feedback-message';
+feedbackMessage.style.cssText = `
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 16px;
+  text-align: center;
+`;
+document.getElementById('faceRecognition-container').appendChild(feedbackMessage);
+
 // Simplified toggle function
 const toggleLoadingIndicator = show => loadingIndicator.style.display = show ? 'block' : 'none';
+
+// Update feedback message
+function updateFeedbackMessage(message) {
+  feedbackMessage.textContent = message;
+}
 
 // Load face-api.js models
 async function loadFaceApiModels() {
@@ -88,6 +112,7 @@ async function startFaceRecognition() {
     await initializeResources();
     startWebcam();
     document.getElementById('faceRecognition-container').style.display = "flex";
+    updateFeedbackMessage("Please blink to verify you're a real person.");
   } catch (error) {
     console.error("Failed to start face recognition:", error);
     alert("Failed to start face recognition. Please try again.");
@@ -103,7 +128,7 @@ function startWebcam() {
   navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
     .then(stream => {
       video.srcObject = stream;
-      video.onloadedmetadata = () => requestAnimationFrame(processFrame);
+      video.onloadedmetadata = () => requestAnimationFrame(antiSpoofingCheck);
     })
     .catch(console.error);
 }
@@ -145,6 +170,64 @@ async function getLabeledFaceDescriptions() {
   }));
 }
 
+// Anti-spoofing check
+async function antiSpoofingCheck(timestamp) {
+  if (!isProcessing && timestamp - lastProcessingTime > processingInterval) {
+    isProcessing = true;
+    lastProcessingTime = timestamp;
+
+    const detections = await faceapi
+      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
+      .withFaceLandmarks();
+
+    if (detections.length > 0) {
+      const landmarks = detections[0].landmarks;
+      const leftEye = landmarks.getLeftEye();
+      const rightEye = landmarks.getRightEye();
+
+      // Check for blinking
+      const eyeAspectRatio = calculateEyeAspectRatio(leftEye, rightEye);
+      const currentEyeState = eyeAspectRatio < 0.2;
+
+      if (lastEyeState !== null && lastEyeState !== currentEyeState) {
+        blinkDetected = true;
+        console.log("Blink detected");
+        updateFeedbackMessage("Blink detected! Proceeding with face recognition...");
+        
+        antiSpoofingPassed = true;
+        console.log("Anti-spoofing check passed");
+        setTimeout(() => {
+          updateFeedbackMessage("Verifying your identity...");
+          requestAnimationFrame(processFrame);
+        }, 1500); // Wait for 1.5 seconds before proceeding to face recognition
+      } else {
+        lastEyeState = currentEyeState;
+        requestAnimationFrame(antiSpoofingCheck);
+      }
+    } else {
+      updateFeedbackMessage("No face detected. Please position your face in front of the camera.");
+      requestAnimationFrame(antiSpoofingCheck);
+    }
+
+    isProcessing = false;
+  } else {
+    requestAnimationFrame(antiSpoofingCheck);
+  }
+}
+
+// Helper function to calculate eye aspect ratio
+function calculateEyeAspectRatio(leftEye, rightEye) {
+  const leftEAR = (
+    (faceapi.euclideanDistance(leftEye[1], leftEye[5]) + faceapi.euclideanDistance(leftEye[2], leftEye[4])) /
+    (2 * faceapi.euclideanDistance(leftEye[0], leftEye[3]))
+  );
+  const rightEAR = (
+    (faceapi.euclideanDistance(rightEye[1], rightEye[5]) + faceapi.euclideanDistance(rightEye[2], rightEye[4])) /
+    (2 * faceapi.euclideanDistance(rightEye[0], rightEye[3]))
+  );
+  return (leftEAR + rightEAR) / 2;
+}
+
 // Optimized frame processing
 async function processFrame(timestamp) {
   if (!isProcessing && timestamp - lastProcessingTime > processingInterval) {
@@ -159,12 +242,17 @@ async function processFrame(timestamp) {
     for (const detection of detections) {
       const result = faceMatcher.findBestMatch(detection.descriptor);
       console.log(`Face match found: ${result.label}`);
+      updateFeedbackMessage(`Identity verified: ${result.label}`);
       await AutoLogin(result.label);
+      return; // Exit after successful login
     }
 
+    updateFeedbackMessage("Face not recognized. Please try again or use manual login.");
     isProcessing = false;
+    requestAnimationFrame(processFrame);
+  } else {
+    requestAnimationFrame(processFrame);
   }
-  requestAnimationFrame(processFrame);
 }
 
 // Simplified AutoLogin function
@@ -177,10 +265,17 @@ async function AutoLogin(userEmail) {
     if (doc) {
       document.getElementById('username').value = doc.data().Email;
       document.getElementById('password').value = doc.data().teacherpass;
-      stopWebcam();
+      updateFeedbackMessage("Login successful! Redirecting...");
+      setTimeout(() => {
+        stopWebcam();
+        // Add code here to submit the login form or redirect to the dashboard
+      }, 2000);
+    } else {
+      updateFeedbackMessage("Login failed. Please try again or use manual login.");
     }
   } catch (error) {
     console.log(error);
+    updateFeedbackMessage("An error occurred. Please try again or use manual login.");
   }
 }
 
