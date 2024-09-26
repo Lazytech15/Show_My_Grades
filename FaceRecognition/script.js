@@ -27,9 +27,26 @@ let lastProcessingTime = 0;
 const processingInterval = 100;
 
 // Anti-spoofing variables
-let lastEyeState = null;
-let blinkDetected = false;
+let eyeStateHistory = [];
+const eyeStateHistoryLength = 30; // Increased for better visibility of patterns
+let eyeClosedDetected = false;
 let antiSpoofingPassed = false;
+
+// Create debug info element
+const debugInfo = document.createElement('div');
+debugInfo.id = 'debug-info';
+debugInfo.style.cssText = `
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: monospace;
+`;
+document.getElementById('faceRecognition-container').appendChild(debugInfo);
 
 // Create the loading indicator with spinner
 const loadingIndicator = document.createElement('div');
@@ -84,7 +101,8 @@ async function loadFaceApiModels() {
   await Promise.all([
     faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
     faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+    faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
   ]);
   console.log("Face-api models loaded");
 }
@@ -96,11 +114,17 @@ async function initializeResources() {
     await loadFaceApiModels();
     console.log("Models loaded");
 
+    // Check if models are actually loaded
+    if (!areModelsLoaded()) {
+      throw new Error("Face-api models failed to load properly");
+    }
+
     const labeledFaceDescriptions = await getLabeledFaceDescriptions();
     faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptions, 0.6);
     console.log("Face data fetched and processed");
   } catch (error) {
     console.error("Error initializing resources:", error);
+    alert("Failed to initialize face recognition. Please check your internet connection and try again.");
   } finally {
     toggleLoadingIndicator(false);
   }
@@ -170,26 +194,117 @@ async function getLabeledFaceDescriptions() {
   }));
 }
 
-// Anti-spoofing check
+function euclideanDistance(point1, point2) {
+  const dx = point1._x - point2._x;
+  const dy = point1._y - point2._y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  console.log(`Euclidean distance calculation:
+    Point1: (${point1._x}, ${point1._y})
+    Point2: (${point2._x}, ${point2._y})
+    dx: ${dx}, dy: ${dy}
+    Distance: ${distance}`);
+  return distance;
+}
+
+function calculateEyeAspectRatio(leftEye, rightEye) {
+  console.log("Left Eye Details:", JSON.stringify(leftEye));
+  console.log("Right Eye Details:", JSON.stringify(rightEye));
+
+  if (!Array.isArray(leftEye) || !Array.isArray(rightEye) || leftEye.length !== 6 || rightEye.length !== 6) {
+    console.error("Invalid eye landmark data");
+    return null;
+  }
+
+  const isValidPoint = point => point && typeof point._x === 'number' && typeof point._y === 'number';
+
+  if (!leftEye.every(isValidPoint) || !rightEye.every(isValidPoint)) {
+    console.error("Invalid landmark coordinates");
+    return null;
+  }
+
+  function safeDistance(p1, p2) {
+    const dist = euclideanDistance(p1, p2);
+    return dist || 0.0001; // Avoid division by zero
+  }
+
+  const leftEAR = (
+    (safeDistance(leftEye[1], leftEye[5]) + safeDistance(leftEye[2], leftEye[4])) /
+    (2 * safeDistance(leftEye[0], leftEye[3]))
+  );
+  console.log("Left Eye Aspect Ratio:", leftEAR);
+
+  const rightEAR = (
+    (safeDistance(rightEye[1], rightEye[5]) + safeDistance(rightEye[2], rightEye[4])) /
+    (2 * safeDistance(rightEye[0], rightEye[3]))
+  );
+  console.log("Right Eye Aspect Ratio:", rightEAR);
+
+  const avgEAR = (leftEAR + rightEAR) / 2;
+  console.log("Average Eye Aspect Ratio:", avgEAR);
+
+  return avgEAR;
+}
+
+function detectBlink(eyeStates) {
+  console.log("Eye State History:", eyeStates);
+  // Look for a pattern of open -> closed -> open
+  for (let i = 1; i < eyeStates.length - 1; i++) {
+    if (eyeStates[i-1] === false && eyeStates[i] === true && eyeStates[i+1] === false) {
+      console.log("Blink detected at index", i);
+      return true;
+    }
+  }
+  console.log("No blink detected");
+  return false;
+}
+
 async function antiSpoofingCheck(timestamp) {
   if (!isProcessing && timestamp - lastProcessingTime > processingInterval) {
     isProcessing = true;
     lastProcessingTime = timestamp;
 
     const detections = await faceapi
-      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
-      .withFaceLandmarks();
+      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks(true);
+
+    console.log("Full Detections:", JSON.stringify(detections));
 
     if (detections.length > 0) {
       const landmarks = detections[0].landmarks;
       const leftEye = landmarks.getLeftEye();
       const rightEye = landmarks.getRightEye();
 
+      console.log("Landmarks:", JSON.stringify(landmarks));
+      console.log("Left Eye:", JSON.stringify(leftEye));
+      console.log("Right Eye:", JSON.stringify(rightEye));
+
       // Check for blinking
       const eyeAspectRatio = calculateEyeAspectRatio(leftEye, rightEye);
-      const currentEyeState = eyeAspectRatio < 0.2;
+      console.log("Eye Aspect Ratio:", eyeAspectRatio);
 
-      if (lastEyeState !== null && lastEyeState !== currentEyeState) {
+      let currentEyeState;
+      if (eyeAspectRatio === null || isNaN(eyeAspectRatio)) {
+        // Fallback method: use the vertical distance between eyelids
+        const leftEyeOpenness = euclideanDistance(leftEye[1], leftEye[5]);
+        const rightEyeOpenness = euclideanDistance(rightEye[1], rightEye[5]);
+        const averageOpenness = (leftEyeOpenness + rightEyeOpenness) / 2;
+        currentEyeState = averageOpenness < 2; // Adjust this threshold as needed
+        console.log("Using fallback method. Average eye openness:", averageOpenness);
+      } else {
+        currentEyeState = eyeAspectRatio < 0.3;
+      }
+
+      console.log("Current Eye State:", currentEyeState);
+
+      eyeStateHistory.push(currentEyeState);
+      if (eyeStateHistory.length > eyeStateHistoryLength) {
+        eyeStateHistory.shift();
+      }
+
+      // Update debug info
+      updateDebugInfo(eyeAspectRatio, currentEyeState, eyeStateHistory);
+
+      if (detectBlink(eyeStateHistory)) {
         blinkDetected = true;
         console.log("Blink detected");
         updateFeedbackMessage("Blink detected! Proceeding with face recognition...");
@@ -199,13 +314,15 @@ async function antiSpoofingCheck(timestamp) {
         setTimeout(() => {
           updateFeedbackMessage("Verifying your identity...");
           requestAnimationFrame(processFrame);
-        }, 1500); // Wait for 1.5 seconds before proceeding to face recognition
+        }, 1500);
       } else {
-        lastEyeState = currentEyeState;
+        updateFeedbackMessage("Please blink to verify you're a real person.");
         requestAnimationFrame(antiSpoofingCheck);
       }
     } else {
+      console.log("No face detected");
       updateFeedbackMessage("No face detected. Please position your face in front of the camera.");
+      updateDebugInfo(null, null, []);
       requestAnimationFrame(antiSpoofingCheck);
     }
 
@@ -215,20 +332,57 @@ async function antiSpoofingCheck(timestamp) {
   }
 }
 
-// Helper function to calculate eye aspect ratio
-function calculateEyeAspectRatio(leftEye, rightEye) {
-  const leftEAR = (
-    (faceapi.euclideanDistance(leftEye[1], leftEye[5]) + faceapi.euclideanDistance(leftEye[2], leftEye[4])) /
-    (2 * faceapi.euclideanDistance(leftEye[0], leftEye[3]))
-  );
-  const rightEAR = (
-    (faceapi.euclideanDistance(rightEye[1], rightEye[5]) + faceapi.euclideanDistance(rightEye[2], rightEye[4])) /
-    (2 * faceapi.euclideanDistance(rightEye[0], rightEye[3]))
-  );
-  return (leftEAR + rightEAR) / 2;
+// In the antiSpoofingCheck function, add this log:
+console.log("Eye State History:", eyeStateHistory);
+
+// Add a function to check if models are loaded
+function areModelsLoaded() {
+  return faceapi.nets.tinyFaceDetector.isLoaded &&
+         faceapi.nets.faceRecognitionNet.isLoaded &&
+         faceapi.nets.faceLandmark68Net.isLoaded &&
+         faceapi.nets.faceLandmark68TinyNet.isLoaded;
 }
 
-// Optimized frame processing
+
+
+// // Helper function to calculate eye aspect ratio
+// function calculateEyeAspectRatio(leftEye, rightEye) {
+//   console.log("Left Eye Details:", JSON.stringify(leftEye));
+//   console.log("Right Eye Details:", JSON.stringify(rightEye));
+
+//   if (!Array.isArray(leftEye) || !Array.isArray(rightEye) || leftEye.length !== 6 || rightEye.length !== 6) {
+//     console.error("Invalid eye landmark data");
+//     return null;
+//   }
+
+//   const isValidPoint = point => point && typeof point.x === 'number' && typeof point.y === 'number';
+
+//   if (!leftEye.every(isValidPoint) || !rightEye.every(isValidPoint)) {
+//     console.error("Invalid landmark coordinates");
+//     return null;
+//   }
+
+//   const leftEAR = (
+//     (faceapi.euclideanDistance(leftEye[1], leftEye[5]) + faceapi.euclideanDistance(leftEye[2], leftEye[4])) /
+//     (2 * faceapi.euclideanDistance(leftEye[0], leftEye[3]))
+//   );
+//   const rightEAR = (
+//     (faceapi.euclideanDistance(rightEye[1], rightEye[5]) + faceapi.euclideanDistance(rightEye[2], rightEye[4])) /
+//     (2 * faceapi.euclideanDistance(rightEye[0], rightEye[3]))
+//   );
+//   return (leftEAR + rightEAR) / 2;
+// }
+
+// Update debug info
+function updateDebugInfo(eyeAspectRatio, currentEyeState, eyeStateHistory) {
+  const eyeStateString = eyeStateHistory.map(state => state ? '●' : '○').join('');
+  debugInfo.innerHTML = `
+    Eye Aspect Ratio: ${eyeAspectRatio ? eyeAspectRatio.toFixed(4) : 'N/A'}<br>
+    Current Eye State: ${currentEyeState !== null ? (currentEyeState ? 'Closed' : 'Open') : 'N/A'}<br>
+    Eye State History: ${eyeStateString}
+  `;
+}
+
 async function processFrame(timestamp) {
   if (!isProcessing && timestamp - lastProcessingTime > processingInterval) {
     isProcessing = true;
@@ -242,18 +396,14 @@ async function processFrame(timestamp) {
     for (const detection of detections) {
       const result = faceMatcher.findBestMatch(detection.descriptor);
       console.log(`Face match found: ${result.label}`);
-      updateFeedbackMessage(`Identity verified: ${result.label}`);
       await AutoLogin(result.label);
-      return; // Exit after successful login
     }
 
-    updateFeedbackMessage("Face not recognized. Please try again or use manual login.");
     isProcessing = false;
-    requestAnimationFrame(processFrame);
-  } else {
-    requestAnimationFrame(processFrame);
   }
+  requestAnimationFrame(processFrame);
 }
+
 
 // Simplified AutoLogin function
 async function AutoLogin(userEmail) {
